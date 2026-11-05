@@ -108,12 +108,31 @@ foreach ($f in 'README.md') {
     if (Test-Path $src) { Copy-Item $src (Join-Path $cs "CSOUND-$f") -Force }
 }
 Copy-Item (Join-Path $root 'licenses\LGPL-2.1-only.txt') (Join-Path $cs 'LICENSE-LGPL-2.1.txt') -Force
+# The LGPL asks that the source of the exact version being distributed is available, so the note
+# names the commit the bundled build was made from. csound --version prints it as
+# "[commit: <40 hex digits>]" (on stderr: Out-String collects both streams as text).
+# Windows PowerShell turns redirected stderr lines into errors, which 'Stop' would make fatal, so
+# the preference is relaxed just for this call.
+$ErrorActionPreference = 'Continue'
+$csVersion = (& (Join-Path $cs 'bin\csound.exe') --version 2>&1 | Out-String)
+$ErrorActionPreference = 'Stop'
+$commit = if ($csVersion -match 'commit: ([0-9a-f]{40})') { $Matches[1] } else { $null }
+$sourceLine = if ($commit) {
+    "Exact source of this build: https://github.com/csound/csound/tree/$commit"
+} else {
+    "Source code: https://github.com/csound/csound"
+}
+if (-not $commit) { Write-Warning "Could not read the Csound commit from csound --version" }
 # Licence/provenance note for the bundled Csound (written as UTF-8 with BOM by Windows PowerShell).
 Set-Content -Path (Join-Path $cs 'ABOUT.txt') -Encoding utf8 -Value @"
-Csound 7 (https://csound.com, source code: https://github.com/csound/csound)
-is free software under the GNU Lesser General Public License 2.1 (LICENSE-LGPL-2.1.txt).
+Csound 7 (https://csound.com) is free software under the GNU Lesser General Public License 2.1
+(LICENSE-LGPL-2.1.txt).
+$sourceLine
 This folder is an unmodified copy of the bin, plugins64 and samples folders of a Csound 7
 installation, used by Csound Visual as a separate dynamic library (csound7_64.dll).
+csound7_64.dll and its plug-ins include third-party libraries (libsndfile, mpg123, LAME, FLAC,
+Ogg, Vorbis, Opus, liblo, PortAudio, PortMidi): see THIRD-PARTY-NOTICES.md and the licenses
+folder next to CsoundVisual.exe.
 "@
 
 # ---- Documentation, licences, VST3 plug-in
