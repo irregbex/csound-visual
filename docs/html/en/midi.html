@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MIDI 2.0 &amp; legacy · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="on" href="../en/midi.html">English</a><a class="" href="../es/midi.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Overview</a><a class="" href="user-guide.html">User guide</a><a class="" href="audio-engine.html">Audio engine &amp; latency</a><a class="" href="editor-intelligence.html">Hover help &amp; live values</a><a class="on" href="midi.html">MIDI 2.0 &amp; legacy</a><a class="" href="visual-3d.html">3D views</a><a class="" href="music-tools.html">Piano roll &amp; step sequencer</a><a class="" href="paint-rooms.html">Paint Rooms</a><a class="" href="vst3-cubase.html">Csound in Cubase (VST3)</a><a class="" href="vst3-host.html">VST3 plug-ins in the app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Cabbage instruments</a><a class="" href="architecture.html">Architecture</a><a class="" href="roadmap.html">Roadmap</a></nav></aside>
+  <main class="content">
+<h1 id="midi-midi-2-0-and-legacy">MIDI (MIDI 2.0 and legacy)</h1>
+<p><figure class="diagram" role="img" aria-label="MIDI flow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .fut { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#mm); }
+  </style>
+  <defs><marker id="mm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="200" height="60" rx="10"/><text class="t" x="35" y="57">WinMM input (MIDI 1.0)</text><text class="d" x="35" y="77">Impact LX61+, UR22mkII…</text>
+  <rect class="box" x="20" y="110" width="200" height="60" rx="10"/><text class="t" x="35" y="137">Windows MIDI Services</text><text class="d" x="35" y="157">MIDI 2.0 · UMP · 16/32-bit</text>
+  <rect class="box" x="20" y="190" width="200" height="60" rx="10"/><text class="t" x="35" y="217">On-screen keyboard</text><text class="d" x="35" y="237">mouse · PC keys</text>
+
+  <rect class="box" x="290" y="100" width="210" height="90" rx="12"/>
+  <text class="t" x="305" y="128">MidiHub</text>
+  <text class="d" x="305" y="150">MidiMessage: 0…1 values</text>
+  <text class="d" x="305" y="168">16-bit vel · 32-bit CC ready</text>
+
+  <rect class="box" x="580" y="20" width="300" height="60" rx="10"/><text class="t" x="595" y="47">Csound (host MIDI I/O)</text><text class="d" x="595" y="67">read callback each k-cycle · massign · notnum</text>
+  <rect class="box" x="580" y="100" width="300" height="60" rx="10"/><text class="t" x="595" y="127">MIDI learn → sliders</text><text class="d" x="595" y="147">"channel:cc" → control channel (lin/exp)</text>
+  <rect class="box" x="580" y="180" width="300" height="60" rx="10"/><text class="t" x="595" y="207">MIDI monitor + key highlight</text><text class="d" x="595" y="227">drained by the UI every frame</text>
+
+  <path class="a" d="M220 60 C255 60 255 130 288 130"/>
+  <path class="a" d="M220 140 H288"/>
+  <path class="a" d="M220 220 C255 220 255 160 288 160"/>
+  <path class="a" d="M500 120 C540 120 540 50 578 50"/>
+  <path class="a" d="M500 145 H578"/>
+  <path class="a" d="M500 170 C540 170 540 210 578 210"/>
+
+  <text class="d" x="20" y="300">Whole messages are queued (never bytes), so the driver thread and the UI can produce at the same time safely.</text>
+  <text class="d" x="20" y="322">Csound receives MIDI 1.0 bytes; high-resolution values stay available to the app (mappings use the full 0…1 value).</text>
+</svg>
+<figcaption>MIDI flow</figcaption></figure></p>
+<p>Csound Visual has two MIDI input backends behind one router (<code>MidiHub</code>):</p>
+<table><thead><tr><th>Backend (as shown)</th><th>API</th><th>Resolution</th><th>Notes</th></tr></thead><tbody><tr><td><strong>MIDI 2.0</strong></td><td>Windows MIDI Services, <code>Windows.Devices.Midi2</code> (WinRT)</td><td>16-bit velocity, 32-bit controllers / pressure / pitch bend</td><td>Recommended. Every device appears here, MIDI 1.0 devices included (wrapped in UMP by the service).</td></tr><tr><td><strong>WinMM</strong></td><td>classic <code>midiIn*</code></td><td>7-bit (14-bit pitch bend)</td><td>Legacy fallback; works on every Windows version.</td></tr></tbody></table>
+<p>The same keyboard is usually listed by both backends. <strong>Enable only one of the two</strong>, otherwise every note arrives twice.</p>
+<h2 id="message-model">Message model</h2>
+<p><code>MidiMessage</code> stores values normalised to 0…1 as doubles, so nothing is lost from MIDI 2.0 sources. For Csound it is converted to MIDI 1.0 bytes, which is what Csound's MIDI opcodes (<code>massign</code>, <code>notnum</code>, <code>veloc</code>, <code>ctrl7</code>…) read through the host MIDI callbacks. MIDI learn mappings use the full-resolution value, so a 32-bit controller moves a slider smoothly.</p>
+<p>Decoded Universal MIDI Packets:</p>
+<ul><li><strong>type 0x2</strong>: MIDI 1.0 channel voice, one word: <code>group | status | data1 | data2</code>;</li><li><strong>type 0x4</strong>: MIDI 2.0 channel voice, two words. Note on/off carry 16-bit velocity in the top half of word 1. CC, channel and poly pressure and pitch bend carry 32-bit values in word 1.</li></ul>
+<p>Other packet types (system, SysEx, stream, utility, flex data) are ignored for now.</p>
+<h2 id="windows-midi-services-integration">Windows MIDI Services integration</h2>
+<ul><li>Package: <code>Windows.Devices.Midi2</code> <strong>0.99.92-preview.11</strong>. The API surface is locked and the package carries a "go-live" licence. Microsoft publishes it on GitHub (<a href="https://github.com/microsoft/MIDI/releases/tag/inbox-preview-11">release inbox-preview-11</a>), not on nuget.org, so it lives in <code>src/packages-local/</code> and is referenced through <code>src/nuget.config</code>.</li><li>The package ships no .NET projection. <strong>C#/WinRT</strong> (<code>Microsoft.Windows.CsWinRT</code> 2.2.0) generates it from the <code>.winmd</code> at build time (<code>CsWinRTInputs</code>/<code>CsWinRTIncludes</code> = <code>Windows.Devices.Midi2</code>). This requires a Windows target framework: the project targets <code>net10.0-windows10.0.26100.0</code>, but keeps <code>bin\&lt;Configuration&gt;\net10.0\</code> as its output folder.</li><li>The app-local <code>Windows.Devices.Midi2.dll</code> + <code>.pri</code> are copied next to the executable. When Windows ships the API in System32, Windows uses its own copy instead. The MIDI card shows which one is active (<code>MidiApi.IsSystemProvided()</code>).</li><li>At start-up <code>MidiApi.EnsureServiceAvailable()</code> demand-starts the <code>midisrv</code> service. Endpoints come from <code>MidiEndpointDeviceInformation.FindAll(…, AllStandardEndpoints)</code> (diagnostic loopbacks excluded). One <code>MidiSession</code> ("Csound Visual") holds all connections. Messages are read with <code>MidiMessageReceivedEventArgs.FillWords</code>, which allocates nothing per message.</li></ul>
+<h2 id="known-issues-and-caveats-preview-11-13">Known issues and caveats (Preview 11 – 13)</h2>
+<p>Collected from Microsoft's release notes and from integrating it here:</p>
+<ol><li><strong>Windows 11 25H2 or later is required.</strong> Microsoft does not support 24H2 and Windows 10. On unsupported systems the backend reports itself unavailable and WinMM keeps working.</li><li><strong>Activation failures become exceptions.</strong> If the service or the API cannot be activated, WinRT throws. The app catches this once (<code>Midi2Input.IsAvailable</code>) and shows the reason in the MIDI card.</li><li><strong>Installer bug in the optional Tools/Transports packages</strong> (<a href="https://github.com/microsoft/MIDI/issues/1323">#1323</a>): previous preview versions must be uninstalled before installing new ones. Csound Visual does not need those installers; the in-box service is enough.</li><li><strong>Tearing down virtual devices could hang</strong> in releases before November 2026. Csound Visual creates no virtual devices yet.</li><li><strong>Two copies of the API</strong>: if Windows has the API in System32, that copy wins over the one shipped with the app. Behaviour may differ slightly from the preview until the 1.0 release.</li><li><strong>Go-live conditions</strong> for shipping the preview DLL: update the app when the API ships in Windows, tell users that a preview API is used (the MIDI card does), and do not ship to Windows versions below 25H2.</li><li><strong>C#/WinRT and .NET</strong>: the generated projection needs a <code>-windows10.0.x</code> target framework, and the package must not flow to dependent projects. It is referenced with <code>PrivateAssets=&quot;all&quot;</code>, because a dependent <code>net10.0</code> project would otherwise fail with <code>NETSDK1130</code>.</li><li><strong>Duplicate devices</strong> (see above): the same device appears as a MIDI 2.0 endpoint and as WinMM ports. Enable only one.</li></ol>
+<h2 id="verified">Verified</h2>
+<ul><li><code>EnsureServiceAvailable</code> → true; API origin: app-local preview.</li><li>Endpoints found on the development PC: Impact LX61+, Steinberg UR22mkII, Vienna Instruments MIDI.</li><li>Round trip through the diagnostic loopback A→B: a MIDI 2.0 note on with velocity <code>0xC000</code> arrived as 0.750011; a 32-bit CC as 0.5; a MIDI 1.0 note in UMP as note 60, velocity 0.787.</li><li>WinMM to Csound: notes 60/67 reach the instrument with their velocities (<code>notnum</code>/<code>veloc</code>).</li></ul>
+<p>Source: <code>src/CsoundVisual/Midi/</code> (<code>MidiMessage</code>, <code>Midi2Input</code>, <code>WinMmMidiInput</code>, <code>MidiHub</code>).</p>
+  </main>
+</div>
+</body>
+</html>

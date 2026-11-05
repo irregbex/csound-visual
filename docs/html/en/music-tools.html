@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piano roll &amp; step sequencer · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="on" href="../en/music-tools.html">English</a><a class="" href="../es/herramientas-musicales.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Overview</a><a class="" href="user-guide.html">User guide</a><a class="" href="audio-engine.html">Audio engine &amp; latency</a><a class="" href="editor-intelligence.html">Hover help &amp; live values</a><a class="" href="midi.html">MIDI 2.0 &amp; legacy</a><a class="" href="visual-3d.html">3D views</a><a class="on" href="music-tools.html">Piano roll &amp; step sequencer</a><a class="" href="paint-rooms.html">Paint Rooms</a><a class="" href="vst3-cubase.html">Csound in Cubase (VST3)</a><a class="" href="vst3-host.html">VST3 plug-ins in the app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Cabbage instruments</a><a class="" href="architecture.html">Architecture</a><a class="" href="roadmap.html">Roadmap</a></nav></aside>
+  <main class="content">
+<h1 id="music-tools-piano-roll-and-step-sequencer">Music tools: piano roll and step sequencer</h1>
+<p>Stage 4 adds two tools that <strong>play the document's instruments live through Csound</strong> and can <strong>write what you made into the score</strong>. Open them from <strong>Tools</strong> in the toolbar (the button with the little piano-roll icon) or with the shortcuts:</p>
+<table><thead><tr><th>Tool</th><th>Shortcut</th><th>For</th></tr></thead><tbody><tr><td><strong>Piano roll</strong></td><td>Ctrl+P</td><td>Drawing melodies, chords and bass lines on a pitch × time grid</td></tr><tr><td><strong>Step sequencer</strong></td><td>Ctrl+Shift+P</td><td>Beats: tracks × sixteenth steps, with a synthesised drum kit</td></tr><tr><td><strong>Open drum kit</strong> (Tools menu or sequencer)</td><td>—</td><td>The <code>DrumKit.csd</code> template (instruments 1–8) in a new tab</td></tr></tbody></table>
+<p>Both windows can stay open next to the editor (or on a second screen). Closing them keeps what you made for the session; closing the main window closes them.</p>
+<h2 id="csound-must-be-playing">Csound must be playing</h2>
+<p>The tools do not make sound themselves: they send notes (<code>i</code> statements) to the running Csound performance. If Csound is <strong>not</strong> in Play mode when you press the tool's <strong>▶ Play</strong>, the tool starts it with the target document (as if you pressed F5) and begins as soon as the performance runs. If Csound is rendering, or the document fails to compile, the tool says so in its status line (bottom right) and the main window's «press Play» bubble appears.</p>
+<p><strong>Target document</strong>: the document being played; when Csound is stopped, the one shown in the editor. Its name is shown under the tool bar. The instrument lists come from its <code>instr</code> lines (numbers or names; the comment after <code>instr 1 ; Kick</code> becomes the label «1 · Kick») and refresh when the document changes. An instrument that is not in the document is listed as «not in the document» and the tool warns before playing.</p>
+<p>If the document's score ends (e.g. a test score of 4 seconds), Csound stops and the transport stops with it: give the score a long event such as <code>i &quot;Reverb&quot; 0 3600</code> or <code>f 0 3600</code>. The demo and the drum kit already have one.</p>
+<h2 id="piano-roll">Piano roll</h2>
+<table><thead><tr><th>Area</th><th>What you do</th></tr></thead><tbody><tr><td><strong>Grid</strong></td><td>Click empty space = new note (hold the button and drag: <strong>right = length, up/down = velocity</strong>). <strong>Right-drag on empty space = box selection</strong>, then <strong>Delete</strong> removes the selected notes (Shift/Ctrl adds to the selection; Ctrl+left-drag also draws a box). Drag a note = move it (all selected notes move together); <strong>Alt+drag</strong> copies. Drag the <strong>right edge</strong> = length. <strong>Right-click</strong> or double-click = delete (the whole selection if the note is selected). <strong>Ctrl+click</strong> adds/removes a note from the selection. Middle button = pan.</td></tr><tr><td><strong>Keys</strong> (left)</td><td>Click (and drag) to audition notes while Csound plays. Labels on every C: C4 = MIDI 60 = middle C (Cubase calls it C3; the status line always shows the MIDI number).</td></tr><tr><td><strong>Ruler</strong> (top)</td><td>Click = start position (the dashed green line; playback and paste start there). Drag = loop range (also switches Loop on).</td></tr><tr><td><strong>Velocity lane</strong> (bottom)</td><td>Drag across the bars to draw velocities like a line; with a selection only the selected notes change. Note colour intensity also shows velocity.</td></tr><tr><td><strong>Wheel</strong></td><td>Wheel = pitch, Shift+wheel = time, <strong>Ctrl+wheel = zoom time</strong> around the mouse, Ctrl+Shift+wheel (or Alt+wheel) = zoom pitch.</td></tr><tr><td><strong>Keyboard</strong> (grid focused)</td><td>Delete, Ctrl+A, Ctrl+C / Ctrl+V (paste at the green line), Ctrl+D (duplicate after the selection), <strong>Ctrl+Z / Ctrl+Y</strong> (undo/redo, 200 steps), arrows (move by grid step / semitone; Shift+↑↓ = octave), Q (quantize starts), Esc (deselect), <strong>Space</strong> = play/stop.</td></tr></tbody></table>
+<p>Tool bar: <strong>Play/Stop</strong>, <strong>Loop</strong>, <strong>Tempo</strong> (BPM, can change while playing), <strong>Grid</strong> (1/1 … 1/32, triplets 1/4 T, 1/8 T, 1/16 T, «—» = free), <strong>Instrument</strong>, the <strong>p4</strong> and <strong>p5</strong> mapping, <strong>Record MIDI</strong>, <strong>Insert into score</strong>, <strong>Import</strong>, and «⋯» (undo/redo, select all, quantize, duplicate, delete, loop to the notes, zoom to fit, back to start, remove the block).</p>
+<h3 id="p-field-mapping">p-field mapping</h3>
+<p>Every note becomes <code>i &lt;instr&gt; &lt;start&gt; &lt;duration&gt; &lt;p4&gt; &lt;p5&gt;</code>:</p>
+<table><thead><tr><th>p4 option</th><th>Value for middle C</th><th>Use in the instrument</th></tr></thead><tbody><tr><td>MIDI note (default)</td><td><code>60</code></td><td><code>cpsmidinn(p4)</code> (the demo's <code>Voice</code>), <code>mtof:i(p4)</code></td></tr><tr><td>Hz</td><td><code>261.6256</code></td><td><code>p4</code> directly</td></tr><tr><td>cpspch</td><td><code>8.00</code> (A4 = <code>8.09</code>)</td><td><code>cpspch(p4)</code></td></tr><tr><td>oct</td><td><code>8</code> (A4 = <code>8.75</code>)</td><td><code>cpsoct(p4)</code></td></tr></tbody></table>
+<p>p5 is the velocity as <strong>0…1</strong> (velocity / 127, ready to multiply an amplitude, as <code>Voice</code> does with <code>asig * p5</code>) or <strong>0…127</strong>.</p>
+<h3 id="record-midi">Record MIDI</h3>
+<p>Turn <strong>Record MIDI</strong> on and press Play: notes played on your MIDI keyboard (or the on-screen one) while the transport runs are added to the roll, snapped to the grid (start rounded to the nearest grid line, length to whole grid steps). With Loop on you can record in layers. The whole take is one undo step (Ctrl+Z).</p>
+<h2 id="step-sequencer">Step sequencer</h2>
+<p>Each <strong>row</strong> is a track: name, <strong>instrument</strong> (p1), <strong>note</strong> (p4; for the drum kit it tunes the drum, the tom uses it as its pitch), <strong>velocity</strong> for new steps, <strong>probability</strong> (0–100 %: each active step plays with that chance on each pass), <strong>M</strong>ute and <strong>S</strong>olo (when any track is soloed only soloed tracks play) and «⋯» (Euclidean fill with 1…16 hits, random fill, rotate left/right, clear, audition, remove the track). <strong>+ Track</strong> adds rows (up to 16).</p>
+<p><strong>Steps</strong>: click = on/off; keep the button down and sweep sideways to paint several; <strong>keep it down and move up/down</strong> on the cell (or <strong>Shift+drag up/down</strong>) or the <strong>wheel</strong> over a step = that step's velocity (bar height); <strong>right-click</strong> = accent (127) on/off. The step being heard is highlighted while playing. Ctrl+Z / Ctrl+Y undo and redo.</p>
+<p>Global: <strong>Tempo</strong>, <strong>Swing</strong> 0–75 % (delays every second sixteenth by that fraction of a step: 33 % ≈ triplet feel, 50 % = dotted), <strong>Steps</strong> 8 / 16 / 32 (half bar, one bar, two bars; steps beyond the count are kept), <strong>Open drum kit</strong>, <strong>Export to score</strong> with <strong>Loops</strong>, <strong>Import</strong>, and «⋯» (example groove, random fill on every track, clear, clear mute/solo, p4/p5 mapping, remove the block).</p>
+<h3 id="the-drum-kit-assets-drumkit-csd">The drum kit (<code>Assets/DrumKit.csd</code>)</h3>
+<p>Eight synthesised drums, no samples: <strong>1 Kick, 2 Snare, 3 Closed hat, 4 Open hat, 5 Clap, 6 Tom, 7 Rim, 8 Cowbell</strong>, plus <strong>instr 100 Master</strong> (reverb send, soft saturation, volume). 48 kHz, stereo, <code>0dbfs = 1</code>. Every drum takes <strong>p4 = MIDI note</strong> (tuning relative to its General MIDI note: kick 36, snare 38, closed hat 42, open hat 46, clap 39, tom 45, rim 37, cowbell 56; 0 = default) and <strong>p5 = velocity 0…1</strong> (0 = 0.8), so the piano roll can play it too. The closed hat chokes a ringing open hat. Sliders: <strong>volume</strong>, <strong>reverb</strong>, <strong>drive</strong>. Try it by hand: <code>i 1 0 1 36 0.9</code> in the live event box.</p>
+<p>The default tracks point at the kit (track <em>n</em> → instrument <em>n</em>) and come with a funk/pop groove at 108 BPM with a little swing: <strong>Open drum kit</strong>, then <strong>▶ Play</strong> — Csound starts with the kit and the groove plays.</p>
+<h2 id="timing-how-notes-are-scheduled">Timing: how notes are scheduled</h2>
+<p><figure class="diagram" role="img" aria-label="Look-ahead scheduling on Csound&#x27;s score clock"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .fut { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#ms); }
+    .l { stroke: var(--dim, #5a7bb8); stroke-width: 1; }
+  </style>
+  <defs><marker id="ms" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="200" height="60" rx="10"/><text class="t" x="35" y="57">Piano roll</text><text class="d" x="35" y="77">RollPattern snapshot</text>
+  <rect class="box" x="20" y="110" width="200" height="60" rx="10"/><text class="t" x="35" y="137">Step sequencer</text><text class="d" x="35" y="157">StepPattern copy · swing</text>
+
+  <rect class="box" x="290" y="55" width="250" height="100" rx="12"/>
+  <text class="t" x="305" y="82">TransportScheduler (thread)</text>
+  <text class="d" x="305" y="104">every ~4 ms: notes starting before</text>
+  <text class="d" x="305" y="121">scoreTime + 120 ms → absolute time</text>
+  <text class="d" x="305" y="138">loop passes · tempo re-anchoring</text>
+
+  <rect class="box" x="610" y="30" width="270" height="60" rx="10"/><text class="t" x="625" y="57">CsoundEngine.SendEventAt</text><text class="d" x="625" y="77">queue (at, instr, dur, p4 p5)</text>
+  <rect class="box" x="610" y="120" width="270" height="70" rx="10"/><text class="t" x="625" y="147">Performance thread, each k-cycle</text><text class="d" x="625" y="167">p2 = at − scoreTime → csoundEventString</text><text class="d" x="625" y="183">i 1 0.0315 0.139 36 0.9449</text>
+
+  <path class="a" d="M220 60 C255 60 255 90 288 90"/>
+  <path class="a" d="M220 140 C255 140 255 120 288 120"/>
+  <path class="a" d="M540 80 C575 80 575 60 608 60"/>
+  <path class="a" d="M745 90 V118"/>
+  <path class="a" d="M610 175 C500 230 420 210 415 158"/>
+  <text class="d" x="440" y="232">score clock (csoundGetScoreTime)</text>
+
+  <line class="l" x1="40" y1="300" x2="860" y2="300"/>
+  <line class="l" x1="120" y1="292" x2="120" y2="308"/><text class="d" x="96" y="325">now</text>
+  <line class="l" x1="300" y1="292" x2="300" y2="308"/><text class="d" x="258" y="325">now + 120 ms</text>
+  <rect x="120" y="294" width="180" height="12" fill="#1e6bff" opacity="0.25"/>
+  <circle cx="160" cy="300" r="5" fill="#1e6bff"/><circle cx="215" cy="300" r="5" fill="#1e6bff"/><circle cx="270" cy="300" r="5" fill="#1e6bff"/>
+  <circle cx="355" cy="300" r="5" fill="none" stroke="#5a7bb8"/><circle cx="440" cy="300" r="5" fill="none" stroke="#5a7bb8"/>
+  <text class="d" x="470" y="296">notes in the window are queued now; later ones on the next passes</text>
+  <text class="d" x="20" y="360">The tools never use the wall clock to place notes: they follow Csound's score time, so audio and notes cannot drift apart.</text>
+</svg>
+<figcaption>Look-ahead scheduling on Csound&#x27;s score clock</figcaption></figure></p>
+<ul><li>Both tools share one <strong>look-ahead scheduler</strong> (<code>Music/TransportScheduler.cs</code>) running on its own above-normal-priority thread, woken every ~4 ms by a <code>Stopwatch</code>-paced loop.</li><li>The clock is <strong>Csound's own score time</strong> (<code>csoundGetScoreTime</code>, published after every control cycle), not the wall clock: there is no drift between the tools and the audio, whatever the device's real rate.</li><li>On every pass the scheduler asks the pattern for the notes that start before <strong>score time + 120 ms</strong> and queues each with its <strong>absolute score time</strong> (<code>CsoundEngine.SendEventAt</code>). The performance thread turns that into the p2 offset <strong>right before the control cycle</strong> that receives it: <code>i 1 0.0315 0.139 36 0.9449</code>. So a note starts on the exact control period it belongs to (1.3 ms at ksmps 64 / 48 kHz; use <code>--sample-accurate</code> for sample precision), regardless of thread jitter or the audio buffer size (the score clock moves one buffer at a time; the look-ahead covers buffers up to ~100 ms).</li><li>Notes more than 250 ms late (after a stall) are dropped instead of played in a bunch; the tool reports how many.</li><li><strong>Loop</strong>: the transport counts linear beats; each loop pass is mapped to the loop region with an offset computed from the pass number, so a note right on the wrap point is sent exactly once. The piano roll plays the run-in before the loop start once, then repeats the region; a note that crosses the loop end is shortened to it.</li><li><strong>Tempo changes</strong> re-anchor the beat ↔ time mapping at the point already scheduled: nothing is sent twice or skipped.</li><li>Edits while playing are heard on the next pass: the tools hand the scheduler an immutable snapshot after every edit.</li><li>Stop ends the transport; notes already started finish their duration. If Csound stops, the transport stops too.</li></ul>
+<h2 id="score-format-export-import">Score format (export / import)</h2>
+<p>The tools write a <strong>marked block</strong> at the end of <code>&lt;CsScore&gt;</code>; exporting again replaces it, nothing else in the score is touched (Ctrl+Z in the editor undoes it). A CSD without a score gets one.</p>
+<pre><code class="lang-">; --- piano roll begin ---
+; Csound Visual · piano roll (Tools › Piano roll). Re-exporting replaces this block.
+;@roll tempo=120 instr=Voice pitch=midi vel=unit snap=0.25 loop=0:16:1
+; times in seconds at 120 BPM (1 beat = 0.5 s) · p4 = MIDI note · p5 = velocity 0-1
+i &quot;Voice&quot; 0          0.5        60 0.7874
+i &quot;Voice&quot; 0.5        0.5        64 0.7874
+; --- piano roll end ---</code></pre>
+<ul><li><strong>Times are in seconds</strong> (beats × 60 / BPM), not beats with a <code>t</code> statement: a <code>t</code> statement would also re-time everything else in the score (the demo's <code>i &quot;Reverb&quot; 0 3600</code> would become 3600 beats) and only one is allowed per section, so converting is the only safe choice.</li><li>The <code>;@roll</code> line keeps the tempo and settings, so <strong>Import</strong> converts back exactly (positions are rounded to 1/960 beat). Verified by a round-trip test: 60 random notes × 4 p4 mappings × 2 p5 mappings × 3 tempos come back identical.</li><li>The step sequencer writes <code>;@seq</code> (tempo, steps, swing, loops, mapping) and one <code>;@track</code> line per row (name, instrument, note, velocity, mute, solo, probability and every step's velocity) followed by the <code>i</code> lines of <strong>Loops</strong> passes (swing and mute/solo applied; probability rolled with a fixed seed, so the same pattern always exports the same).</li><li><strong>Import (piano roll)</strong>: from the block when there is one (settings restored too); otherwise every <code>i</code> statement of the chosen instrument in the score, at the current tempo and mapping (lines using carry <code>.</code>, <code>+</code>, ramps or expressions are skipped and counted). <strong>Import (sequencer)</strong>: from its block.</li><li>When a tool window opens and the target document has its block (and the tool is still empty / untouched), it is loaded automatically: save the file, reopen it tomorrow, open the tool and the pattern is back.</li></ul>
+<h2 id="source">Source</h2>
+<p><code>Music/</code> (<code>TransportScheduler</code>, <code>PianoRollModel</code>, <code>StepPattern</code>, <code>ScoreBlocks</code>, <code>PFields</code>, <code>EngineScoreTarget</code>), <code>Controls/PianoRollView.cs</code>, <code>Controls/StepGridView.cs</code>, <code>Views/PianoRollWindow.cs</code>, <code>Views/StepSequencerWindow.cs</code>, <code>Views/ToolTransport.cs</code>, <code>ViewModels/MainViewModel.MusicTools.cs</code>, <code>Engine/CsoundEngine.cs</code> (<code>SendEventAt</code>), <code>Assets/DrumKit.csd</code>.</p>
+  </main>
+</div>
+</body>
+</html>

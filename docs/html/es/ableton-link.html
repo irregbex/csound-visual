@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ableton Link · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="" href="../en/ableton-link.html">English</a><a class="on" href="../es/ableton-link.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Resumen</a><a class="" href="guia-de-usuario.html">Guía de usuario</a><a class="" href="motor-de-audio.html">Motor de audio y latencia</a><a class="" href="inteligencia-del-editor.html">Ayuda al pasar el mouse y valores en vivo</a><a class="" href="midi.html">MIDI 2.0 y clásico</a><a class="" href="visual-3d.html">Vistas 3D</a><a class="" href="herramientas-musicales.html">Piano roll y secuenciador</a><a class="" href="salas-de-pintura.html">Paint Rooms (pintar sonido)</a><a class="" href="vst3-cubase.html">Csound en Cubase (VST3)</a><a class="" href="host-vst3.html">Plugins VST3 en la app</a><a class="on" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Instrumentos Cabbage</a><a class="" href="arquitectura.html">Arquitectura</a><a class="" href="hoja-de-ruta.html">Hoja de ruta</a></nav></aside>
+  <main class="content">
+<h1 id="ableton-link">Ableton Link</h1>
+<p><strong>Ableton Link</strong> mantiene a tiempo varios programas de música por la red local: comparten un <strong>tempo</strong>, una <strong>grilla de pulsos</strong> y la <strong>fase dentro del compás</strong>, y (si se quiere) <strong>tocar/detener</strong>. Lo hablan Ableton Live, Bitwig Studio, Reason, Traktor, muchas apps de iOS/Android y ahora Csound Visual. Cualquiera puede cambiar el tempo y los demás lo siguen en pocos milisegundos; no hay "maestro".</p>
+<blockquote><p><strong>Cubase no tiene Link.</strong> Con Cubase 15 usa el plugin VST3 de Csound Visual: dentro de Cubase la orquesta recibe el tempo y la posición del host en <code>HOST_BPM</code>, <code>HOST_PLAYING</code> y <code>HOST_PPQ</code> (ver <a href="vst3-cubase.html">Csound en Cubase</a>).</p></blockquote>
+<h2 id="cómo-se-activa">Cómo se activa</h2>
+<ul><li><strong>Configuración › Sincronización</strong> (Ctrl+,): <strong>Activar Ableton Link</strong>, <strong>Pulsos por compás</strong> (el <em>quantum</em>, 4 por defecto) y <strong>Compartir tocar/detener (Start Stop Sync)</strong>. Las tres opciones se guardan; si Link estaba activo al cerrar la app, vuelve a activarse al abrirla.</li><li>El pequeño <strong>indicador de Link</strong> (punto + «Link · 1 par · 120.0 BPM») lo activa y desactiva con un clic. Colores del punto: gris = apagado, azul = activo y solo, verde = activo con pares.</li></ul>
+<h2 id="configuración-en-ableton-live-última-versión">Configuración en Ableton Live (última versión)</h2>
+<ol><li><strong>Preferencias › Link, Tempo &amp; MIDI</strong> (Live 12; «Link/MIDI» en versiones anteriores): pon <strong>Show Link Toggle</strong> en <em>Show</em>. Activa <strong>Start Stop Sync</strong> si quieres que Play/Stop de Live arranque y detenga el piano roll y el secuenciador de Csound Visual (y al revés).</li><li>Haz clic en el botón <strong>Link</strong> arriba a la izquierda de la barra de control de Live. Muestra «1 Link» cuando Csound Visual está en la sesión.</li><li>En Csound Visual activa Link. El indicador muestra «Link · 1 par · &lt;tempo de Live&gt; BPM».</li><li>Cambia el tempo en Live: el indicador, toda orquesta que lea <code>LINK_BPM</code> y las herramientas abiertas lo siguen. Cámbialo en el piano roll o el secuenciador: Live lo sigue.</li><li>Usa el mismo <strong>quantum</strong> en ambos programas (la cuantización de lanzamiento de Live: «1 Bar» en 4/4 = 4 pulsos).</li></ol>
+<p>Dos programas en el mismo PC funcionan al instante. Con otro computador o un celular, deben estar en la misma red (Wi-Fi o cable, misma subred, multicast permitido).</p>
+<h2 id="qué-recibe-la-orquesta">Qué recibe la orquesta</h2>
+<p>Mientras Csound toca y Link está activo, la app escribe estos canales de control <strong>antes de cada ciclo de control</strong> (en el propio hilo de Csound, sin reservar memoria):</p>
+<table><thead><tr><th>Canal</th><th>Valor</th></tr></thead><tbody><tr><td><code>LINK_BPM</code></td><td>tempo de la sesión; <strong>0 mientras Link está apagado</strong> (sirve para volver al tempo propio)</td></tr><tr><td><code>LINK_BEAT</code></td><td>posición en pulsos en la línea de tiempo compartida</td></tr><tr><td><code>LINK_PHASE</code></td><td>posición dentro del compás: 0 … quantum (0 = el "1" que cuenta Live)</td></tr><tr><td><code>LINK_PLAYING</code></td><td>1 mientras el transporte compartido toca (con Start Stop Sync), si no 0</td></tr><tr><td><code>LINK_PEERS</code></td><td>cuántas otras apps Link hay en la sesión</td></tr><tr><td><code>LINK_QUANTUM</code></td><td>pulsos por compás elegidos en Configuración › Sincronización</td></tr></tbody></table>
+<p>Los valores se calculan para el momento en que el bloque <strong>se va a escuchar</strong>, no cuando se calcula: el reloj de Link (µs) se traduce al reloj de partitura de Csound con un desfase suavizado, más la latencia de salida que conoce el motor. Con el motor WASAPI propio es la latencia del stream que informa Windows más un periodo y medio del dispositivo; con PortAudio/ASIO (Csound maneja el dispositivo) la latencia es desconocida y se toma como 0, así que el sonido puede llegar unos ms tarde respecto de Live.</p>
+<pre><code class="lang-csound">kbpm  chnget &quot;LINK_BPM&quot;
+kbeat chnget &quot;LINK_BEAT&quot;
+kph   chnget &quot;LINK_PHASE&quot;
+kbpm  = (kbpm &gt; 0 ? kbpm : 110)         ; tempo propio si Link está apagado
+if changed(floor(kbeat)) == 1 then       ; empezó un pulso nuevo en este bloque
+  schedulek &quot;Click&quot;, 0, 0.05, (kph &lt; 0.5 ? 1 : 0)
+endif</code></pre>
+<p>El ejemplo <strong>Showcase › 13 · Pulso Ableton Link</strong> (<code>Examples/Showcase/13_link_pulse.csd</code>) lo hace bien: deriva un reloj de semicorcheas de <code>LINK_BEAT</code>, pone cada nota en su desfase exacto dentro del bloque de control, acentúa el primer tiempo con <code>LINK_PHASE</code>, cambia de acorde en cada compás y vuelve a su propio slider de tempo cuando Link está apagado.</p>
+<p>Ojo: Link comparte la <strong>fase</strong>, no el número de pulso. Dos pares pueden contar los compases desde orígenes distintos (<code>LINK_BEAT</code> = 37,0 aquí y 5,0 en otra app), pero <code>LINK_PHASE</code> y la fracción del pulso siempre coinciden.</p>
+<h2 id="piano-roll-y-secuenciador-por-pasos">Piano roll y secuenciador por pasos</h2>
+<p>Con Link activo, el transporte de las herramientas:</p>
+<ul><li><strong>sigue el tempo de la sesión</strong> (la casilla de tempo se actualiza sola) y un tempo escrito en la herramienta pasa a ser el de la sesión; pero solo abrir una ventana nunca cambia el tempo de Live;</li><li><strong>empieza en el próximo compás</strong> (fase 0 del quantum), como un clip en Live, y queda <strong>en fase</strong>: en cada pasada del programador (~4 ms) se re-ancla la correspondencia pulso → tiempo de Csound sobre la línea de tiempo de Link, así que los cambios de tempo de cualquier par se siguen sin deriva;</li><li>con <strong>Start Stop Sync</strong>: ▶ en la herramienta arranca el transporte compartido (en el primer tiempo); Play en Live arranca las herramientas abiertas (en el compás de inicio de Live si aún no llega, si no en el siguiente); Stop en cualquier lado detiene al otro.</li></ul>
+<p>Las notas ya encoladas (el programador trabaja 120 ms adelantado) conservan el tempo anterior si un par lo cambia dentro de esa ventana: como mucho una o dos notas caen un poco antes o después justo en el instante del cambio.</p>
+<h2 id="firewall">Firewall</h2>
+<p>Link usa UDP multicast (puerto 20808). La primera vez el Firewall de Windows puede preguntar si Csound Visual puede comunicarse en redes: permite <strong>redes privadas</strong> para sincronizar con otros computadores o celulares. Los programas del mismo PC funcionan aunque no lo permitas. En nuestras pruebas en este PC no apareció ningún aviso.</p>
+<h2 id="probar-sin-live">Probar sin Live</h2>
+<ul><li><code>CsoundVisual.exe --link-test [segundos] [--peer ruta\link_peer_test.exe]</code>: prueba completa y en silencio (Csound toca ceros por WASAPI). Un segundo proceso entra a 97 BPM, cambia el tempo, arranca y detiene el transporte; la prueba revisa los pares, la convergencia del tempo en ambos sentidos, la fase en los mismos instantes del reloj, los canales <code>LINK_*</code> tal como los ve la orquesta y un transporte enganchado a Link.</li><li><code>link_peer_test.exe --bpm 97 --seconds 30 --tempo-at 10:133 --play-at 15 --stop-at 20 --start-stop</code>: un par Link independiente que imprime la línea de tiempo; también sirve junto a Live.</li></ul>
+<h2 id="compilación">Compilación</h2>
+<p><code>powershell -ExecutionPolicy Bypass -File tools\build_link.ps1</code> descarga Ableton Link 3.1.5 y el commit de asio-standalone que referencia en <code>src\AbletonLink\external\</code>, compila <code>CsoundVisualLink.dll</code> (Link + su API C oficial <code>abl_link</code>, x64, CRT estático, Release) y <code>link_peer_test.exe</code> con Visual Studio 2022, hace una prueba con dos pares y copia la DLL a <code>src\CsoundVisual\native\</code> (el csproj la copia junto al exe). <strong>Sin la DLL la app funciona normal</strong>: Link aparece como no disponible.</p>
+<h2 id="licencia">Licencia</h2>
+<p>Ableton Link es <strong>GPL-2.0 o posterior</strong> (o una licencia comercial de Ableton). Compilarlo dentro de Csound Visual para uso personal está bien. Distribuir la app junto con <code>CsoundVisualLink.dll</code> deja esa distribución bajo la GPL (código disponible, misma licencia), salvo que Ableton otorgue una licencia propietaria (link-devs@ableton.com). La DLL es un archivo aparte y opcional, así que la app también se puede entregar sin ella.</p>
+  </main>
+</div>
+</body>
+</html>

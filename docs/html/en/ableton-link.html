@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ableton Link · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="on" href="../en/ableton-link.html">English</a><a class="" href="../es/ableton-link.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Overview</a><a class="" href="user-guide.html">User guide</a><a class="" href="audio-engine.html">Audio engine &amp; latency</a><a class="" href="editor-intelligence.html">Hover help &amp; live values</a><a class="" href="midi.html">MIDI 2.0 &amp; legacy</a><a class="" href="visual-3d.html">3D views</a><a class="" href="music-tools.html">Piano roll &amp; step sequencer</a><a class="" href="paint-rooms.html">Paint Rooms</a><a class="" href="vst3-cubase.html">Csound in Cubase (VST3)</a><a class="" href="vst3-host.html">VST3 plug-ins in the app</a><a class="on" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Cabbage instruments</a><a class="" href="architecture.html">Architecture</a><a class="" href="roadmap.html">Roadmap</a></nav></aside>
+  <main class="content">
+<h1 id="ableton-link">Ableton Link</h1>
+<p><strong>Ableton Link</strong> keeps several music programs in time over the local network: they share one <strong>tempo</strong>, one <strong>beat grid</strong> and the <strong>phase inside the bar</strong>, and (optionally) <strong>play/stop</strong>. Ableton Live, Bitwig Studio, Reason, Traktor, many iOS/Android apps and now Csound Visual speak it. Any participant can change the tempo and every other one follows within a few milliseconds; nobody is "master".</p>
+<blockquote><p><strong>Cubase does not support Link.</strong> With Cubase 15, use the Csound Visual VST3 plug-in instead: inside Cubase an orchestra gets the host tempo and position as <code>HOST_BPM</code>, <code>HOST_PLAYING</code> and <code>HOST_PPQ</code> (see <a href="vst3-cubase.html">Csound in Cubase</a>).</p></blockquote>
+<h2 id="turning-it-on">Turning it on</h2>
+<ul><li><strong>Settings › Sync</strong> (Ctrl+,): <strong>Enable Ableton Link</strong>, <strong>Beats per bar</strong> (the <em>quantum</em>, default 4) and <strong>Share play/stop (Start Stop Sync)</strong>. All three are remembered; if Link was on when you closed the app, it is on again at the next start.</li><li>The small <strong>Link status</strong> control (dot + «Link · 1 peer · 120.0 BPM») turns Link on/off with a click. Dot colours: grey = off, blue = on and alone, green = on with peers.</li></ul>
+<h2 id="setup-in-ableton-live-latest-version">Setup in Ableton Live (latest version)</h2>
+<ol><li><strong>Preferences › Link, Tempo &amp; MIDI</strong> (Live 12; «Link/MIDI» in older versions): set <strong>Show Link Toggle</strong> to <em>Show</em>. Turn <strong>Start Stop Sync</strong> on if you want Live's Play/Stop to start/stop Csound Visual's piano roll and step sequencer (and the other way round).</li><li>Click the <strong>Link</strong> switch at the top left of Live's control bar. It shows «1 Link» when Csound Visual is in the session.</li><li>In Csound Visual turn Link on. The status shows «Link · 1 peer · &lt;Live's tempo&gt; BPM».</li><li>Change the tempo in Live: the status, every orchestra reading <code>LINK_BPM</code> and the open tool windows follow. Change it in the piano roll or step sequencer: Live follows.</li><li>Use the same <strong>quantum</strong> in both programs (Live's launch quantisation: «1 Bar» in 4/4 = 4 beats).</li></ol>
+<p>Both programs on the same computer work immediately. For another computer or a phone, they must be on the same network (Wi-Fi or cable, same subnet, multicast allowed).</p>
+<h2 id="what-the-orchestra-receives">What the orchestra receives</h2>
+<p>While Csound plays and Link is on, the app writes these control channels <strong>before every control cycle</strong> (on Csound's own thread, without allocations):</p>
+<table><thead><tr><th>Channel</th><th>Value</th></tr></thead><tbody><tr><td><code>LINK_BPM</code></td><td>session tempo; <strong>0 while Link is off</strong> (use it to fall back to your own tempo)</td></tr><tr><td><code>LINK_BEAT</code></td><td>beat position on the shared timeline</td></tr><tr><td><code>LINK_PHASE</code></td><td>position inside the bar: 0 … quantum (0 = the "1" Live counts)</td></tr><tr><td><code>LINK_PLAYING</code></td><td>1 while the shared transport plays (with Start Stop Sync), else 0</td></tr><tr><td><code>LINK_PEERS</code></td><td>number of other Link apps in the session</td></tr><tr><td><code>LINK_QUANTUM</code></td><td>beats per bar chosen in Settings › Sync</td></tr></tbody></table>
+<p>The values are computed for the moment the block <strong>will be heard</strong>, not the moment it is computed: Link's host clock (µs) is mapped to Csound's score clock with a smoothed offset, plus the output latency the engine knows. With the app's own WASAPI engine this is the stream latency reported by Windows plus one and a half device periods; with PortAudio/ASIO (Csound drives the device) the latency is unknown and taken as 0, so sound may be a few ms late against Live.</p>
+<pre><code class="lang-csound">kbpm  chnget &quot;LINK_BPM&quot;
+kbeat chnget &quot;LINK_BEAT&quot;
+kph   chnget &quot;LINK_PHASE&quot;
+kbpm  = (kbpm &gt; 0 ? kbpm : 110)         ; own tempo when Link is off
+if changed(floor(kbeat)) == 1 then       ; a new beat started in this block
+  schedulek &quot;Click&quot;, 0, 0.05, (kph &lt; 0.5 ? 1 : 0)
+endif</code></pre>
+<p>The example <strong>Showcase › 13 · Ableton Link pulse</strong> (<code>Examples/Showcase/13_link_pulse.csd</code>) does it properly: it derives a sixteenth-note clock from <code>LINK_BEAT</code>, places every note at its exact offset inside the control block, accents the downbeat with <code>LINK_PHASE</code>, changes chord every bar and falls back to its own tempo slider when Link is off.</p>
+<p>Note: Link shares the <strong>phase</strong>, not the beat number. Two peers can count bars from different origins (<code>LINK_BEAT</code> = 37.0 here, 5.0 in another app), but <code>LINK_PHASE</code> and the beat fraction always agree.</p>
+<h2 id="piano-roll-and-step-sequencer">Piano roll and step sequencer</h2>
+<p>With Link on, the tools' transport:</p>
+<ul><li><strong>follows the session tempo</strong> (the tempo box updates by itself) and a tempo typed in the tool becomes the session tempo — but merely opening a tool window never changes Live's tempo;</li><li><strong>starts on the next bar</strong> (phase 0 of the quantum), like a clip in Live, and stays <strong>phase-locked</strong>: on every scheduling pass (~4 ms) the scheduler re-anchors its beat → Csound-time mapping on Link's timeline, so tempo changes made by any peer are followed without drift;</li><li>with <strong>Start Stop Sync</strong>: ▶ in the tool starts the shared transport (on the downbeat); Play in Live starts the open tools (on Live's start bar if it is still ahead, otherwise on the next bar); Stop on either side stops the other.</li></ul>
+<p>Notes already queued (the scheduler works 120 ms ahead) keep the old tempo if a peer changes it inside that window: at most one or two notes land slightly early or late at the exact moment of a tempo change.</p>
+<h2 id="firewall">Firewall</h2>
+<p>Link uses UDP multicast (port 20808). The first time, Windows Firewall may ask whether Csound Visual may communicate on networks: allow <strong>private networks</strong> to sync with other computers or phones. Programs on the same computer work even without allowing it. In our tests on this PC no prompt appeared.</p>
+<h2 id="testing-without-live">Testing without Live</h2>
+<ul><li><code>CsoundVisual.exe --link-test [seconds] [--peer path\to\link_peer_test.exe]</code>: silent end-to-end check (Csound plays zeros through WASAPI). A second process joins at 97 BPM, changes tempo, starts and stops the transport; the test checks peers, tempo convergence both ways, phase agreement at identical host times, the <code>LINK_*</code> channels as the orchestra sees them and a transport locked to Link.</li><li><code>link_peer_test.exe --bpm 97 --seconds 30 --tempo-at 10:133 --play-at 15 --stop-at 20 --start-stop</code>: a stand-alone Link peer that prints the timeline; useful with Live too.</li></ul>
+<h2 id="building">Building</h2>
+<p><code>powershell -ExecutionPolicy Bypass -File tools\build_link.ps1</code> downloads Ableton Link 3.1.5 and the asio-standalone commit it references into <code>src\AbletonLink\external\</code>, builds <code>CsoundVisualLink.dll</code> (Link + its official C API <code>abl_link</code>, x64, static CRT, Release) and <code>link_peer_test.exe</code> with Visual Studio 2022, runs a two-peer smoke test and copies the DLL to <code>src\CsoundVisual\native\</code> (the csproj copies it next to the exe). <strong>Without the DLL the app runs normally</strong>: Link is shown as unavailable.</p>
+<h2 id="licence">Licence</h2>
+<p>Ableton Link is <strong>GPL-2.0-or-later</strong> (or a commercial licence from Ableton). Building it into Csound Visual for personal use is fine. Distributing the app together with <code>CsoundVisualLink.dll</code> makes that distribution subject to the GPL (source available, same licence), unless Ableton grants a proprietary licence (link-devs@ableton.com). The DLL is a separate, optional file, so the app can also be shipped without it.</p>
+  </main>
+</div>
+</body>
+</html>

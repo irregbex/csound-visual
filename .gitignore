@@ -1,0 +1,37 @@
+# ---- .NET / Visual Studio build output
+bin/
+obj/
+publish/
+*.user
+*.suo
+.vs/
+
+# ---- CMake build trees of the native parts (VST3 plug-in, VST3 host bridge, Ableton Link)
+src/CsoundVST/build/
+src/CsoundVST/dist/
+src/VstHost/build/
+src/AbletonLink/build/
+
+# ---- Third-party SDKs downloaded by the build scripts (not stored in this repository)
+#      tools/build_vst.ps1  -> src/CsoundVST/external/vst3sdk   (Steinberg VST3 SDK, MIT)
+#      tools/build_link.ps1 -> src/AbletonLink/external/{link,asio} (Ableton Link GPL-2.0+, asio BSL-1.0)
+src/CsoundVST/external/
+src/AbletonLink/external/
+
+# ---- Windows MIDI Services package (103 MB, above GitHub's file limit)
+#      tools/get_midi2_package.ps1 downloads it from github.com/microsoft/MIDI
+src/packages-local/*.nupkg
+
+# ---- Native DLLs built by tools/build_vsthost.ps1 and tools/build_link.ps1
+src/CsoundVisual/native/*.dll
+
+# ---- Csound 7 installation used during development (install Csound 7 or copy it here; see BUILDING.md)
+@Source/
+
+# ---- Release packages made by tools/package.ps1
+release/
+
+# ---- Personal notes and editor settings
+@ *.md
+.vscode/
+*.code-workspace

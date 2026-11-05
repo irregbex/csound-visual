@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Csound in Cubase (VST3) · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="on" href="../en/vst3-cubase.html">English</a><a class="" href="../es/vst3-cubase.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Overview</a><a class="" href="user-guide.html">User guide</a><a class="" href="audio-engine.html">Audio engine &amp; latency</a><a class="" href="editor-intelligence.html">Hover help &amp; live values</a><a class="" href="midi.html">MIDI 2.0 &amp; legacy</a><a class="" href="visual-3d.html">3D views</a><a class="" href="music-tools.html">Piano roll &amp; step sequencer</a><a class="" href="paint-rooms.html">Paint Rooms</a><a class="on" href="vst3-cubase.html">Csound in Cubase (VST3)</a><a class="" href="vst3-host.html">VST3 plug-ins in the app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Cabbage instruments</a><a class="" href="architecture.html">Architecture</a><a class="" href="roadmap.html">Roadmap</a></nav></aside>
+  <main class="content">
+<h1 id="csound-inside-cubase-vst3">Csound inside Cubase (VST3)</h1>
+<p>Csound Visual comes with two VST3 plug-ins that carry <strong>Csound 7 inside</strong>:</p>
+<table><thead><tr><th>Plug-in</th><th>Where it goes in Cubase</th><th>What it does</th></tr></thead><tbody><tr><td><strong>Csound Visual Instrument</strong></td><td>Instrument track</td><td>A synth played via MIDI. Default: «Velvet Poly», a polyphonic pad with chorus and reverb.</td></tr><tr><td><strong>Csound Visual FX</strong></td><td>Insert of an audio track</td><td>An effect on the track's audio. Default: «Wide Echo Space», modulated ping-pong delay + chorus + reverb.</td></tr></tbody></table>
+<p>The point: <strong>any orchestra you write in Csound Visual can be sent to the plug-in</strong> with the <strong>Send to DAW</strong> button, and it plays inside your Cubase project, with your tracks, your mix and your effects.</p>
+<h2 id="installation">Installation</h2>
+<p>They are already installed in <code>%LOCALAPPDATA%\Programs\Common\VST3\CsoundVisual.vst3</code> (the per-user VST3 folder, scanned by Cubase automatically). The plug-in is self-contained: it carries its own copy of Csound.</p>
+<p>To rebuild: <code>powershell -ExecutionPolicy Bypass -File tools\build_vst.ps1</code> (with Cubase closed — Windows locks a loaded plug-in).</p>
+<h2 id="step-by-step-in-cubase-15">Step by step in Cubase 15</h2>
+<ol><li>Start Cubase. If the plug-ins don't show up: <strong>Studio › VST Plug-in Manager</strong>, check that <code>C:\Users\&lt;you&gt;\AppData\Local\Programs\Common\VST3</code> is among the VST 3 paths and press <strong>Rescan</strong>.</li><li>Create an <strong>instrument track</strong> and choose <strong>Csound Visual Instrument</strong> (vendor «Csound Visual»). Play your keyboard: the pad should sound.</li><li>In Csound Visual open an orchestra (the demo, an example or a showcase piece) and press <strong>Send to DAW</strong> › pick the track. The plug-in's Csound messages appear in the app's console.</li><li>The app's output card turns <strong>green</strong> and is titled <strong>VST3 OUTPUT</strong>: the scope, spectrum and meters show what plays <strong>inside Cubase</strong>, even when the app itself is not playing.</li><li>From then on <strong>the app's sliders control the plug-in</strong> (the status bar shows «⇄ track · orchestra»). In Cubase the same controls appear as plug-in parameters named after each channel (<code>cutoff</code>, <code>reverb</code>…): they can be <strong>automated</strong> and recorded.</li><li>For an effect: insert <strong>Csound Visual FX</strong> on an audio track and send an orchestra that reads the input with <code>inch 1, 2</code> (or <code>ain1, ain2 ins</code>).</li></ol>
+<h2 id="what-the-plug-in-gives-the-orchestra">What the plug-in gives the orchestra</h2>
+<ul><li><strong>Audio</strong>: Cubase's sample rate replaces the file's <code>sr</code>; stereo input (FX) and output.</li><li><strong>MIDI</strong>: notes, pitch bend, modulation (CC1), CC2, CC11, sustain (CC64) and aftertouch. <code>massign</code> and MIDI instruments work as in the app.</li><li><strong>Tempo and transport</strong> in channels readable with <code>chnget</code>: <code>HOST_BPM</code>, <code>HOST_PLAYING</code> (0/1), <code>HOST_PPQ</code> (position in quarter notes) and <code>HOST_SR</code>.</li><li><strong>16 automatable parameters</strong> named and ranged after the orchestra's first 16 <code>chnk</code> channels.</li><li><strong>The project remembers the orchestra</strong>: saving the Cubase project stores the code and the values.</li></ul>
+<h2 id="limitations">Limitations</h2>
+<ul><li>No window of its own: Cubase shows its generic parameter editor. The code is edited in Csound Visual and sent.</li><li>Fixed latency of <em>ksmps</em> samples (Cubase compensates it): prefer a small ksmps (32 or 64).</li><li>The score starts when the orchestra is compiled, not with Cubase's transport: use <code>HOST_PLAYING</code> and <code>HOST_PPQ</code> to sync.</li><li>Sound-file paths inside an orchestra must be absolute.</li></ul>
+<p>Technical details (architecture, threads, protocol): <code>src\CsoundVST\README.md</code>.</p>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{
+  "pieces": [
+    {
+      "file": "Showcase/01_generative_ambient.csd",
+      "title": "Generative ambient",
+      "titleEs": "Ambiente generativo",
+      "description": "An endless piece that composes itself: Markov-chain chords, a random-walk melody, pads, plucks and FM bells. No two runs are the same.",
+      "descriptionEs": "Una pieza infinita que se compone sola: acordes elegidos con una cadena de Markov, una melodía en paseo aleatorio, pads, punteos y campanas FM. Nunca suena igual dos veces.",
+      "midi": false,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/02_granular_cloud.csd",
+      "title": "Granular cloud",
+      "titleEs": "Nube granular",
+      "description": "A melody is recorded live into a buffer and sprayed out as up to 200 tiny grains per second, becoming a shimmering cloud you can freeze in time.",
+      "descriptionEs": "Una melodía se graba en vivo en un búfer y sale convertida en hasta 200 granos diminutos por segundo: una nube brillante que puedes congelar en el tiempo.",
+      "midi": false,
+      "headphones": true
+    },
+    {
+      "file": "Showcase/03_physical_models.csd",
+      "title": "Physical models",
+      "titleEs": "Modelado físico",
+      "description": "Guitar, marimba, bowed cello and church bells simulated from the physics of strings, bars and bronze. Play them from your MIDI keyboard.",
+      "descriptionEs": "Guitarra, marimba, violonchelo con arco y campanas de iglesia simulados a partir de la física de cuerdas, barras y bronce. Tócalos con tu teclado MIDI.",
+      "midi": true,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/04_spectral_magic.csd",
+      "title": "Spectral magic",
+      "titleEs": "Magia espectral",
+      "description": "The phase vocoder turns a synthetic singer into wind, freezes single instants, blurs them and builds a choir from one voice while keeping its vowels.",
+      "descriptionEs": "El vocoder de fase convierte a un cantante sintético en viento, congela instantes, los difumina y arma un coro a partir de una sola voz sin perder sus vocales.",
+      "midi": false,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/05_fm_keys_and_bells.csd",
+      "title": "FM electric piano and bells",
+      "titleEs": "Piano eléctrico FM y campanas",
+      "description": "DX7-style frequency modulation: a velocity-sensitive tine electric piano with chorus, then the same algorithm with another ratio becomes tubular bells. Playable via MIDI.",
+      "descriptionEs": "Modulación de frecuencia al estilo DX7: un piano eléctrico sensible a la velocidad con chorus, y luego el mismo algoritmo con otra razón se vuelve campanas tubulares. Se toca por MIDI.",
+      "midi": true,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/06_formant_choir.csd",
+      "title": "The singing machine",
+      "titleEs": "La máquina que canta",
+      "description": "FOF formant synthesis sings a four-part chorale with a soloist whose vowels change on every note, built from measured soprano, alto, tenor and bass formants.",
+      "descriptionEs": "La síntesis de formantes FOF canta un coral a cuatro voces con una solista que cambia de vocal en cada nota, a partir de formantes medidos de soprano, contralto, tenor y bajo.",
+      "midi": false,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/07_drum_machine.csd",
+      "title": "Drum machine from scratch",
+      "titleEs": "Caja de ritmos desde cero",
+      "description": "Kick, snare, hats, claps, acid bass and stabs synthesised from oscillators and noise, sequenced with euclidean rhythms and swing into a track that arranges itself.",
+      "descriptionEs": "Bombo, caja, hi-hats, palmas, bajo ácido y acordes sintetizados con osciladores y ruido, secuenciados con ritmos euclidianos y swing en un tema que se arregla solo.",
+      "midi": false,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/08_shepard_risset.csd",
+      "title": "The endless glissando",
+      "titleEs": "El glissando infinito",
+      "description": "The Shepard-Risset illusion: a chord that rises forever without getting higher, plus a pulse that accelerates forever without getting faster.",
+      "descriptionEs": "La ilusión de Shepard-Risset: un acorde que sube para siempre sin llegar más arriba, y un pulso que acelera para siempre sin ir más rápido.",
+      "midi": false,
+      "headphones": true
+    },
+    {
+      "file": "Showcase/09_karplus_strong_guitars.csd",
+      "title": "Karplus-Strong guitars",
+      "titleEs": "Guitarras Karplus-Strong",
+      "description": "Noise bursts in tuned delay lines become a strummed acoustic guitar, a bass and an arpeggiated guitar with a dotted-eighth echo.",
+      "descriptionEs": "Ráfagas de ruido en líneas de retardo afinadas se convierten en una guitarra acústica rasgueada, un bajo y una guitarra en arpegio con eco de corchea con puntillo.",
+      "midi": false,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/10_convolution_cathedral.csd",
+      "title": "Convolution spaces",
+      "titleEs": "Espacios por convolución",
+      "description": "Csound computes the impulse responses of a room, a concert hall and a cathedral at start-up and convolves a flute melody with them as it travels between the spaces.",
+      "descriptionEs": "Csound calcula al arrancar las respuestas al impulso de una sala, una sala de conciertos y una catedral, y convoluciona con ellas una melodía de flauta que viaja de un espacio a otro.",
+      "midi": false,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/11_binaural_3d.csd",
+      "title": "Binaural 3D",
+      "titleEs": "3D binaural",
+      "description": "With measured HRTFs a shaker and a music box orbit around your head, behind and above you, while you place a humming drone anywhere in 3D. Use headphones.",
+      "descriptionEs": "Con HRTF medidas, un shaker y una cajita de música giran alrededor de tu cabeza, por detrás y por encima, mientras tú ubicas un zumbido en cualquier punto del espacio 3D. Usa audífonos.",
+      "midi": false,
+      "headphones": true
+    },
+    {
+      "file": "Showcase/12_finale.csd",
+      "title": "Finale: Six Rooms",
+      "titleEs": "Final: Seis salas",
+      "description": "A complete 2½-minute composition written as a score: Shepard riser, FM bells and lead, Karplus-Strong guitars, synthesised drums, a FOF choir and a spectral freeze of the whole mix.",
+      "descriptionEs": "Una composición completa de dos minutos y medio escrita como partitura: subida de Shepard, campanas y melodía FM, guitarras Karplus-Strong, batería sintetizada, coro FOF y un congelado espectral de toda la mezcla.",
+      "midi": false,
+      "headphones": false
+    },
+    {
+      "file": "Showcase/13_link_pulse.csd",
+      "title": "Ableton Link pulse",
+      "titleEs": "Pulso Ableton Link",
+      "description": "A metronome, sub bass and sixteenth-note arpeggio locked to Ableton Link through the LINK_BEAT / LINK_PHASE channels: turn Link on here and in Live and it plays on Live's beats and bars, following every tempo change. With Link off it runs on its own tempo slider.",
+      "descriptionEs": "Un metrónomo, un bajo y un arpegio en semicorcheas fijos a Ableton Link mediante los canales LINK_BEAT / LINK_PHASE: activa Link aquí y en Live y suena en los pulsos y compases de Live, siguiendo cada cambio de tempo. Con Link apagado usa su propio slider de tempo.",
+      "midi": false,
+      "headphones": false
+    }
+  ]
+}

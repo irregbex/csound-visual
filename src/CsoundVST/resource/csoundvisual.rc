@@ -1,0 +1,31 @@
+// Version resource of CsoundVisual.vst3 (shown in Windows file properties).
+#include <winver.h>
+#include "../source/version.h"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION CSV_VERSION_MAJOR,CSV_VERSION_MINOR,CSV_VERSION_PATCH,CSV_VERSION_BUILD
+ PRODUCTVERSION CSV_VERSION_MAJOR,CSV_VERSION_MINOR,CSV_VERSION_PATCH,CSV_VERSION_BUILD
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS VOS__WINDOWS32
+ FILETYPE VFT_DLL
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Csound Visual"
+            VALUE "FileDescription", "Csound Visual VST3 (Csound 7 instrument and effect)"
+            VALUE "FileVersion", CSV_VERSION_STR
+            VALUE "InternalName", "CsoundVisual.vst3"
+            VALUE "OriginalFilename", "CsoundVisual.vst3"
+            VALUE "ProductName", "Csound Visual VST3"
+            VALUE "ProductVersion", CSV_VERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

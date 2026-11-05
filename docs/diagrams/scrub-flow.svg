@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#m); }
+  </style>
+  <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="160" height="60" rx="10"/><text class="t" x="35" y="58">Mouse over token</text><text class="d" x="35" y="78">350 ms rest</text>
+  <rect class="box" x="220" y="30" width="200" height="60" rx="10"/><text class="t" x="235" y="58">CsoundAnalyzer.Inspect</text><text class="d" x="235" y="78">kind · definition · range</text>
+  <rect class="box" x="460" y="30" width="180" height="60" rx="10"/><text class="t" x="475" y="58">Hover card</text><text class="d" x="475" y="78">help · range bar · value</text>
+  <path class="a" d="M180 60 H218"/><path class="a" d="M420 60 H458"/>
+
+  <rect class="box" x="20" y="150" width="160" height="60" rx="10"/><text class="t" x="35" y="178">Press + drag</text><text class="d" x="35" y="198">→ ↑ up · ← ↓ down</text>
+  <rect class="box" x="220" y="120" width="200" height="56" rx="10"/><text class="t" x="235" y="146">Channel token</text><text class="d" x="235" y="164">kcut chnget "cutoff"</text>
+  <rect class="box" x="220" y="190" width="200" height="56" rx="10"/><text class="t" x="235" y="216">Numeric literal</text><text class="d" x="235" y="234">0.25 in instr Voice</text>
+  <rect class="box" x="460" y="120" width="200" height="56" rx="10"/><text class="t" x="475" y="146">Slider + engine</text><text class="d" x="475" y="164">SetControl every cycle</text>
+  <rect class="box" x="460" y="190" width="200" height="56" rx="10"/><text class="t" x="475" y="216">Rewrite text</text><text class="d" x="475" y="234">one undo group</text>
+  <rect class="box" x="700" y="190" width="180" height="56" rx="10"/><text class="t" x="715" y="216">CompileOrc(instr)</text><text class="d" x="715" y="234">throttled 120 ms</text>
+  <path class="a" d="M180 172 H218"/><path class="a" d="M180 190 L218 214"/>
+  <path class="a" d="M420 148 H458"/><path class="a" d="M420 218 H458"/><path class="a" d="M660 218 H698"/>
+
+  <rect class="box" x="20" y="270" width="860" height="44" rx="10"/>
+  <text class="t" x="35" y="297">Esc while dragging → channel restored / undo group reverted (and recompiled) → value before the drag</text>
+</svg>

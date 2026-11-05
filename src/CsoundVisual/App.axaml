@@ -1,0 +1,47 @@
+<!--
+  App.axaml - the Avalonia Application object of Csound Visual (code-behind: App.axaml.cs).
+
+  Loaded once at start-up by App.Initialize() (AvaloniaXamlLoader). It only declares the global
+  style stack, in this order (later entries win on equal specificity):
+    1. FluentTheme - Avalonia's stock control templates, with a custom dark palette.
+    2. AvaloniaEdit's Fluent styles - templates for the code editor control (TextEditor).
+    3. Styles/Theme.axaml - the app's own icons and style classes.
+
+  The app is dark-only (RequestedThemeVariant="Dark"); "light" looks are provided by the colour
+  presets of Theming/AppTheme.cs instead of Avalonia's Light variant.
+-->
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CsoundVisual.App"
+             RequestedThemeVariant="Dark">
+  <Application.Styles>
+    <!-- Fluent palette for the Dark variant (combo boxes, check boxes, scroll bars, text boxes...).
+         The colour values below are only start-up placeholders (an amber palette from the app's
+         early look): AppTheme.Apply() - called from App.OnFrameworkInitializationCompleted before
+         the main window is created - overwrites every one of them from the active preset
+         (Accent<-Accent, AltHigh<-BgDeep, RegionColor<-Bg, BaseHigh<-Text,
+         ChromeMediumLow<-Surface, ChromeMedium<-Surface2, ChromeLow<-ChromeLow, ChromeHigh<-Line,
+         ErrorText<-Danger; see AppTheme.UpdateFluentPalette). The x:Key="Dark" entry must exist,
+         because that method looks the palette up by ThemeVariant.Dark and edits it in place. -->
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Dark"
+                               Accent="#F5B800"
+                               AltHigh="#1A1400"
+                               RegionColor="#241C00"
+                               BaseHigh="#FFF2B0"
+                               ChromeMediumLow="#2B2200"
+                               ChromeMedium="#332900"
+                               ChromeLow="#1F1800"
+                               ChromeHigh="#4D3E00"
+                               ErrorText="#FF7A59" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+    <!-- Control templates of AvaloniaEdit's TextEditor (the CSD editor); without this include the
+         editor has no visual template. -->
+    <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+    <!-- The app's styles (icons, .card/.tool/.primary/.tabs/... classes). Included last so they
+         override the two libraries above. -->
+    <StyleInclude Source="avares://CsoundVisual/Styles/Theme.axaml" />
+  </Application.Styles>
+</Application>

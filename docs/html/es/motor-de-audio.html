@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motor de audio y latencia · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="" href="../en/audio-engine.html">English</a><a class="on" href="../es/motor-de-audio.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Resumen</a><a class="" href="guia-de-usuario.html">Guía de usuario</a><a class="on" href="motor-de-audio.html">Motor de audio y latencia</a><a class="" href="inteligencia-del-editor.html">Ayuda al pasar el mouse y valores en vivo</a><a class="" href="midi.html">MIDI 2.0 y clásico</a><a class="" href="visual-3d.html">Vistas 3D</a><a class="" href="herramientas-musicales.html">Piano roll y secuenciador</a><a class="" href="salas-de-pintura.html">Paint Rooms (pintar sonido)</a><a class="" href="vst3-cubase.html">Csound en Cubase (VST3)</a><a class="" href="host-vst3.html">Plugins VST3 en la app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Instrumentos Cabbage</a><a class="" href="arquitectura.html">Arquitectura</a><a class="" href="hoja-de-ruta.html">Hoja de ruta</a></nav></aside>
+  <main class="content">
+<h1 id="motor-de-audio-y-latencia">Motor de audio y latencia</h1>
+<p>Csound Visual puede manejar el dispositivo de audio de dos maneras. Se elige en la tarjeta <strong>Audio</strong> (<em>Motor</em>), y la app recuerda la elección, el dispositivo, la latencia y el ksmps.</p>
+<p><figure class="diagram" role="img" aria-label="Rutas de audio: WASAPI manejado por la app y PortAudio/ASIO manejado por Csound"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .alt { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; }
+    .t { fill: var(--text, #a8ccff); }
+    .h { fill: var(--accent-hi, #5aa0ff); font-weight: 600; }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.8; fill: none; marker-end: url(#ar); }
+    .b { stroke: var(--dim, #5a7bb8); stroke-width: 1.6; fill: none; marker-end: url(#ar2); stroke-dasharray: 6 4; }
+  </style>
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker>
+    <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5a7bb8"/></marker>
+  </defs>
+
+  <text class="h" x="30" y="30">A · App-driven WASAPI (default)</text>
+  <rect class="box" x="30" y="45" width="150" height="70" rx="10"/>
+  <text class="t" x="45" y="75">Csound</text><text class="d" x="45" y="97">PerformKsmps → spout</text>
+  <rect class="box" x="220" y="45" width="150" height="70" rx="10"/>
+  <text class="t" x="235" y="75">FIFO + mapping</text><text class="d" x="235" y="97">channels · 0dbfs → ±1</text>
+  <rect class="box" x="410" y="45" width="160" height="70" rx="10"/>
+  <text class="t" x="425" y="75">Format conversion</text><text class="d" x="425" y="97">float32 · int16/24/32</text>
+  <rect class="box" x="610" y="45" width="260" height="70" rx="10"/>
+  <text class="t" x="625" y="75">WASAPI shared / exclusive</text><text class="d" x="625" y="97">IAudioClient3 · event-driven · MMCSS</text>
+  <path class="a" d="M180 80 H218"/><path class="a" d="M370 80 H408"/><path class="a" d="M570 80 H608"/>
+  <path class="a" d="M740 115 V140 H105 V117"/>
+  <text class="d" x="300" y="160">device event: "give me N frames" → compute ⌈N / ksmps⌉ control cycles</text>
+
+  <text class="h" x="30" y="215">B · Csound-driven (PortAudio → ASIO, MME, WDM-KS)</text>
+  <rect class="alt" x="30" y="230" width="150" height="70" rx="10"/>
+  <text class="t" x="45" y="260">Csound</text><text class="d" x="45" y="282">PerformKsmps</text>
+  <rect class="alt" x="220" y="230" width="230" height="70" rx="10"/>
+  <text class="t" x="235" y="260">rtpa module (PortAudio)</text><text class="d" x="235" y="282">-+rtaudio=pa_cb · -b / -B buffers</text>
+  <rect class="alt" x="490" y="230" width="380" height="70" rx="10"/>
+  <text class="t" x="505" y="260">ASIO driver (e.g. Yamaha Steinberg USB ASIO)</text><text class="d" x="505" y="282">blocks PerformKsmps until the device has room</text>
+  <path class="b" d="M180 265 H218"/><path class="b" d="M450 265 H488"/>
+
+  <text class="d" x="30" y="345">Offline render (WAV): Csound writes the file itself, no device involved.</text>
+  <text class="d" x="30" y="368">Both paths share CsoundEngine.Step(): UI requests → csoundPerformKsmps → meters/scope → score time → tables.</text>
+</svg>
+<figcaption>Rutas de audio: WASAPI manejado por la app y PortAudio/ASIO manejado por Csound</figcaption></figure></p>
+<h2 id="motores">Motores</h2>
+<table><thead><tr><th>Motor (como aparece en la app)</th><th>Quién maneja el dispositivo</th><th>Latencia típica</th><th>Cuándo usarlo</th></tr></thead><tbody><tr><td><strong>Windows · WASAPI compartido (recomendado)</strong></td><td>la app (<code>WasapiOutput</code>, modo compartido)</td><td>3–10 ms (según el driver)</td><td>El uso diario. Es la salida estándar de Windows 11 y las demás apps siguen sonando.</td></tr><tr><td><strong>Windows · WASAPI exclusivo (latencia mínima)</strong></td><td>la app (modo exclusivo)</td><td>periodo de ≈3 ms</td><td>Tocar en vivo sin ASIO. Las demás apps se silencian mientras suena.</td></tr><tr><td><strong>Csound · PortAudio (ASIO, MME, WDM-KS)</strong></td><td>el módulo <code>rtpa</code> de Csound</td><td>según <code>-b</code>/<code>-B</code> y el driver</td><td>Drivers ASIO como <em>Yamaha Steinberg USB ASIO</em>.</td></tr><tr><td>Csound · PortAudio bloqueante</td><td>Csound (<code>pa_bl</code>)</td><td>igual que el anterior</td><td>Compatibilidad.</td></tr><tr><td>Csound · WASAPI interno</td><td>el <code>rtwasapi</code> de Csound</td><td>≈22 ms, fija</td><td>Solo compatibilidad (ver abajo).</td></tr></tbody></table>
+<h3 id="por-qué-la-app-tiene-su-propio-wasapi">Por qué la app tiene su propio WASAPI</h3>
+<p>Esto se midió en el equipo de desarrollo con el módulo <code>rtwasapi</code> que trae Csound 7.0:</p>
+<ul><li><strong>siempre abrió un buffer compartido de 1056 frames (≈22 ms)</strong>, sin importar <code>-b</code>/<code>-B</code>;</li><li>el modo exclusivo <strong>falló en todos los dispositivos</strong> (<code>0x88890008</code>, formato no soportado). El módulo solo prueba float de 32 bits, y la mayoría del hardware pide enteros de 16 o 24 bits en modo exclusivo.</li></ul>
+<p>El <code>WasapiOutput</code> de la app resuelve las dos cosas:</p>
+<ul><li><strong>Compartido:</strong> usa <code>IAudioClient3::InitializeSharedAudioStream</code> con el periodo más corto que ofrezca el driver. Por ejemplo, 336 frames (7 ms) en un dispositivo USB Realtek en vez de 480 (10 ms). Si el driver no tiene periodos cortos, abre un stream compartido clásico por eventos.</li><li><strong>Exclusivo:</strong> negocia un formato que el hardware acepte, en este orden: float32, int32, int24 en 32, int24 empaquetado e int16. Prueba primero la frecuencia del dispositivo, luego 48 y 44,1 kHz, y usa el periodo mínimo. Si el driver responde <code>AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED</code>, realinea el buffer al tamaño que pide.</li><li>El hilo de audio se registra en <strong>MMCSS</strong> como <em>Pro Audio</em>, así Windows lo trata como audio profesional.</li></ul>
+<h3 id="resultados-medidos-prueba-en-silencio-0-cortes-en-todos-los-casos">Resultados medidos (prueba en silencio, 0 cortes en todos los casos)</h3>
+<table><thead><tr><th>Dispositivo</th><th>Modo / latencia</th><th>Periodo</th><th>Latencia estimada</th><th>DSP</th></tr></thead><tbody><tr><td>Steinberg UR22mkII</td><td>exclusivo / Mínima</td><td>132 frames a 44,1 kHz (2,99 ms), int24</td><td>≈6 ms</td><td>1,6 %</td></tr><tr><td>Steinberg UR22mkII</td><td>exclusivo / Baja</td><td>265 frames (6 ms)</td><td>≈12 ms</td><td>1,3 %</td></tr><tr><td>Realtek USB SPDIF</td><td>compartido baja latencia / Mínima</td><td>336 frames a 48 kHz (7 ms)</td><td>≈7 ms</td><td>1,7 %</td></tr><tr><td>LG ULTRAGEAR (HDMI NVIDIA)</td><td>exclusivo / Mínima</td><td>144 frames (3 ms), int24 en 32</td><td>≈6 ms</td><td>2,6 %</td></tr></tbody></table>
+<p>Los audífonos Bluetooth siempre agregan su propia latencia (a menudo 100 ms o más), y eso no lo puede quitar ninguna aplicación.</p>
+<h3 id="dispositivos-a-44-1-khz-y-modo-exclusivo">Dispositivos a 44,1 kHz y modo exclusivo</h3>
+<p>Los drivers de audio USB trabajan en paquetes de 1 ms. A 44,1 kHz un periodo de 3 ms son 132,3 frames y uno de 6 ms, 264,6: el driver se desfasa una fracción de muestra en cada periodo y el sonido cruje. Por eso el modo exclusivo prueba <strong>primero 48 kHz</strong> y solo usa periodos que sean un número entero de milisegundos <em>y</em> de frames. Si un dispositivo solo acepta 44,1 kHz en exclusivo (la UR22mkII cuando Windows la tiene a 44,1 kHz), recibe un periodo exacto de 10 ms. En ese caso la consola sugiere cambiarlo a 48 kHz (<em>Configuración › Sonido › dispositivo › Propiedades › Opciones avanzadas</em>) para llegar a ≈3 ms.</p>
+<p>El motor también cuenta un corte cuando el hilo de audio despierta mucho más tarde que un periodo, y mantiene el recolector de basura de .NET en modo <em>SustainedLowLatency</em> mientras suena.</p>
+<h3 id="usar-el-wasapi-driver-for-asio">Usar el <em>WASAPI Driver for ASIO</em></h3>
+<p>El driver (<a href="https://github.com/irregbex/WASAPI-Driver-for-ASIO/releases">0.9.15</a>) aparece en el motor <strong>Csound · PortAudio</strong> como <strong>ASIO · WASAPI Driver for ASIO</strong>. Valen sus propias recomendaciones: modo compartido con <em>Low latency in Shared</em> y buffer de 128 o 256 para audio USB o integrado (exclusivo con 64–128 para la latencia mínima; 512 o más para Bluetooth). El buffer real lo fija su panel; los presets <code>-b/-B</code> de Csound solo tienen que ser iguales o mayores (<em>Baja</em> = 256/512 calza bien). Su KNOWN-ISSUES KI-12 coincide con lo que se midió aquí: la UR22mkII en exclusivo necesita el driver Yamaha Steinberg USB a la frecuencia del proyecto.</p>
+<h2 id="niveles-de-latencia">Niveles de latencia</h2>
+<table><thead><tr><th>Nivel</th><th>WASAPI de la app</th><th>Csound/PortAudio</th></tr></thead><tbody><tr><td><strong>Mínima</strong></td><td>el periodo mínimo del dispositivo</td><td><code>-b128 -B256</code></td></tr><tr><td><strong>Baja</strong></td><td>cerca del doble del mínimo</td><td><code>-b256 -B512</code></td></tr><tr><td><strong>Normal (estable)</strong></td><td>el periodo por defecto (≈10 ms)</td><td><code>-b512 -B2048</code></td></tr></tbody></table>
+<p>Si oyes clics o cortes, sube un nivel. La barra de estado muestra dos indicadores:</p>
+<ul><li><strong>DSP %</strong>: el tiempo que Csound usa para calcular el audio dividido por el tiempo disponible. Sobre 100 % el audio se corta.</li><li><strong>cortes</strong>: cuántas veces el dispositivo se quedó sin muestras.</li></ul>
+<h3 id="ksmps">ksmps</h3>
+<p><em>ksmps</em> son las muestras por ciclo de control. Más chico da controles y MIDI más precisos, pero usa más CPU. <em>Del archivo</em> respeta el valor del <code>.csd</code>; cualquier otra opción pasa <code>--ksmps=N</code>.</p>
+<h3 id="frecuencia-de-muestreo">Frecuencia de muestreo</h3>
+<p>Con la salida propia de la app, el <code>sr</code> de la orquesta se ajusta al del dispositivo (<code>--sample-rate</code>). Es necesario porque el modo compartido corre a la frecuencia configurada en <em>Configuración › Sonido</em>. La consola muestra el stream que se abrió de verdad, por ejemplo:</p>
+<pre><code class="lang-">🔊 WASAPI exclusivo · Line (Steinberg UR22mkII ) · 44100 Hz · 2 ch · int24 · periodo 132 frames (2,99 ms) · latencia ≈ 6 ms
+🔊 dispositivo 44100 Hz · Csound sr 44100 Hz</code></pre>
+<p>La segunda línea (que también se agrega a la línea del stream en <em>Configuración › Audio</em>) indica la frecuencia real del dispositivo en Windows y el <code>sr</code> de Csound, para que un <code>.csd</code> que dice <code>sr = 48000</code> en un dispositivo a 44,1 kHz no confunda: con el motor de la app siempre coinciden, porque el <code>sr</code> del archivo se reemplaza. En exclusivo el stream puede correr a otra frecuencia que la de Windows; entonces se muestran ambas (<code>48000 Hz (Windows: 44100 Hz)</code>). Cuando Csound maneja el dispositivo (PortAudio, WASAPI de Csound) la línea dice, por ejemplo, <code>WASAPI · Altavoces (X) · dispositivo 44100 Hz · Csound sr 48000 Hz (Windows convierte)</code>; los drivers ASIO se ponen a la frecuencia de Csound, así que para ellos solo se muestra el <code>sr</code>.</p>
+<h2 id="entrada-de-audio-en-vivo">Entrada de audio en vivo</h2>
+<p>Las orquestas que leen <code>ain1, ain2 in</code> (o <code>inch</code>) pueden procesar un micrófono o la entrada de una interfaz dentro de la app, sin DAW. Se elige en <em>Configuración › Audio › Entrada</em>:</p>
+<ul><li><strong>Ninguna</strong> (por defecto): no cambia nada; <code>in</code> lee silencio, como antes.</li><li><strong>Predeterminado de Windows</strong>: el dispositivo de grabación predeterminado de <em>Configuración › Sonido › Entrada</em>.</li><li>Un dispositivo concreto, p. ej. <em>Line (Steinberg UR22mkII)</em>. Se guarda por su id.</li></ul>
+<p>Funciona con los motores propios de la app (<em>Windows · WASAPI compartido/exclusivo</em>). Con PortAudio/ASIO es Csound quien abre la entrada: agrega <code>-iadc</code> (o <code>-iadcN</code>) en <code>&lt;CsOptions&gt;</code>.</p>
+<p><strong>Canales de entrada.</strong> Una interfaz como la UR22mkII entrega sus dos entradas como <strong>un solo dispositivo estéreo</strong> (entrada 1 = izquierda, entrada 2 = derecha). <em>Configuración › Audio › Canales de entrada</em> decide cómo llegan a Csound; se aplica al instante, también mientras suena:</p>
+<table><thead><tr><th>Opción</th><th>Lo que recibe Csound</th><th>Cuándo usarla</th></tr></thead><tbody><tr><td><strong>Estéreo</strong> (por defecto)</td><td><code>inch 1</code> = entrada 1, <code>inch 2</code> = entrada 2: dos canales mono independientes</td><td>dos fuentes (p. ej. micrófono + guitarra) o una fuente estéreo real; la orquesta decide qué hacer con cada una (<code>a1 inch 1</code>, <code>a2 inch 2</code>)</td></tr><tr><td><strong>Mono: solo la entrada 1</strong></td><td>la entrada 1 en todos los canales</td><td>un micrófono en la entrada 1 y un efecto estéreo (<code>ain1, ain2 in</code>): lo escucha en ambos lados</td></tr><tr><td><strong>Mono: solo la entrada 2</strong></td><td>la entrada 2 en todos los canales</td><td>una fuente en la entrada 2</td></tr><tr><td><strong>Mono: entradas 1 + 2 sumadas</strong></td><td>la suma en todos los canales</td><td>dos fuentes mezcladas en una</td></tr></tbody></table>
+<p>Ejemplo que trata las dos entradas como instrumentos separados en modo <em>Estéreo</em>:</p>
+<pre><code class="lang-csound">instr 1
+  aVoz     inch 1                 ; micrófono en la entrada 1
+  aGuitarra inch 2                ; guitarra en la entrada 2
+  aVerb    reverb aVoz, 2.5       ; reverb solo a la voz
+  aDist    distort1 aGuitarra, 4, 0.5, 0, 0   ; saturación solo a la guitarra
+  outs aVerb * 0.4 + aDist * 0.3, aVerb * 0.4 + aDist * 0.3
+endin</code></pre>
+<p><strong>Solo modo compartido.</strong> La captura (<code>Audio/WasapiInput.cs</code>) es siempre compartida, así que Cubase, el navegador o una llamada pueden usar la misma entrada a la vez. Con latencia <em>Mínima</em> o <em>Baja</em> pide el periodo corto de IAudioClient3 (≈3 ms) si el driver lo ofrece; si no, el de ≈10 ms. El formato de mezcla se convierte a float (float32, int16, int24 empaquetado, int32/24 en 32, cualquier número de canales). Su propio hilo MMCSS «Pro Audio» solo copia muestras a un anillo sin bloqueos y preasignado (un productor, un consumidor: <code>Audio/InputRingBuffer.cs</code>).</p>
+<p><strong>Hacia Csound.</strong> Antes de cada <code>csoundPerformKsmps</code> el motor escribe un bloque de control en el buffer de entrada de Csound (<code>csoundGetSpin</code>); con E/S de audio del host, Csound 7 lo lee con <code>in</code> e <code>inch</code> y nunca lo borra (verificado), y no hace falta la opción <code>-i</code>. <code>nchnls_i</code> <em>no</em> se fuerza (Csound lo iguala a <code>nchnls</code>; forzar 2 rompería las orquestas mono que usan <code>ain in</code>): el canal <em>c</em> de la entrada va al canal <em>c</em> de Csound, una entrada mono va a todos los canales y los canales de Csound que sobran reciben silencio. Los valores se escalan por <code>0dbfs</code>.</p>
+<p><strong>Relojes y frecuencias distintas.</strong> La entrada y la salida pueden ser dispositivos distintos (entrada de la UR22, salida por audífonos Bluetooth). Aunque tengan la misma frecuencia nominal, sus cristales difieren en decenas de ppm, así que un FIFO simple se vaciaría o crecería de a poco. <code>AdaptiveInputReader</code> lee el anillo con un paso fraccional <code>inRate / sr × (1 + c)</code> e interpolación cúbica de 4 puntos (Catmull-Rom):</p>
+<ul><li><code>c</code> es una corrección proporcional <code>(llenado − objetivo) / (inRate × 4 s)</code>, limitada a ±0,5 %. Una deriva de <em>d</em> ppm se compensa con un desvío del llenado de apenas ≈ <em>d</em> × 0,2 frames a 48 kHz, y 100 ppm equivalen a 0,17 cent de afinación: inaudible.</li><li>El llenado se estima de forma <em>continua</em>: <code>cantidad + (ahora − hora del último paquete) × inRate</code> (muestras ya grabadas pero aún no entregadas), suavizado en ≈0,5 s. Mirar la cantidad cruda dependería de la fase entre los periodos de los dos dispositivos, que se desplaza con la deriva, y el control divagaría.</li><li>Llenado objetivo (la latencia que agrega la entrada) = un periodo de captura + un periodo de salida + un bloque ksmps + 3 ms; p. ej. ≈24 ms con periodos de 10 ms, ≈10 ms con 3 ms.</li><li>Si el anillo se vacía (entrada detenida o desconectada) la entrada queda en silencio hasta que vuelve al objetivo y entra con un fundido de un bloque. Si crece muy por encima del objetivo (salida detenida) se descartan las muestras más antiguas. La salida nunca se corta.</li><li>Las frecuencias nominales distintas (entrada 44,1 kHz, salida 48 kHz) usan el mismo remuestreador. Subir de frecuencia es limpio; bajar (96 → 48 kHz) no tiene filtro antialiasing, así que lo que haya sobre 24 kHz podría reflejarse (los micrófonos e instrumentos casi no tienen contenido ahí).</li></ul>
+<p>Medido en una simulación sin tiempo real, con 1,5 ms de retraso aleatorio en el hilo de captura: la corrección se fija en la deriva simulada (+200 ppm → +190, −150 → −146, +80 → +83, +50 → +46 ppm), sin cortes; una entrada detenida 150 ms se recupera en un bloque, y el residuo contra un seno ideal queda 53–64 dB por debajo.</p>
+<p><strong>Errores.</strong> Si el dispositivo se desconecta o se desactiva, la consola lo avisa una vez (<code>⚠ La entrada de audio se desconectó…</code>) y la salida sigue sonando con la entrada en silencio. Si Windows bloquea el acceso al micrófono (<em>Configuración › Privacidad y seguridad › Micrófono</em>, que también cubre las entradas de línea de las interfaces) la entrada no se puede abrir: la consola explica dónde activarlo y la ejecución sigue sin entrada.</p>
+<p><strong>Medidor.</strong> Mientras una entrada alimenta a Csound, bajo los medidores de salida del panel lateral aparece un medidor <strong>ENT</strong> (picos por canal de entrada, antes de Csound). La barra de estado agrega los cortes de la entrada.</p>
+<p>Orquesta de prueba: <em>Ejemplos › AudioFX › Live › L0 Prueba de entrada</em> (auto-wah, delay ping-pong, reverb; muestra el nivel de entrada cada segundo). Usa audífonos para evitar acoples.</p>
+<h2 id="cuando-el-dispositivo-elegido-falla">Cuando el dispositivo elegido falla</h2>
+<ul><li><strong>No está disponible</strong> (desconectado, desactivado u ocupado): la app abre la <strong>salida predeterminada de Windows</strong> en su lugar y lo avisa en la consola. Tu elección guardada no cambia.</li><li><strong>Se abre pero nunca pide muestras</strong> (su reloj se detuvo; pasa con una interfaz USB cuyo driver se colgó): a los 2 s la ejecución termina con un aviso en la consola, se suelta el dispositivo y <strong>se vuelve a tocar una vez con la salida predeterminada de Windows</strong>. Las siguientes ejecuciones de la sesión siguen usando la predeterminada hasta que elijas una salida de nuevo en <em>Configuración › Audio</em>. Stop funciona siempre, aunque el dispositivo esté colgado. El dispositivo se arregla desconectándolo y volviéndolo a conectar.</li><li><strong>La entrada no está disponible</strong> (desconectada, o el micrófono bloqueado en la privacidad de Windows): la ejecución sigue sin entrada (<code>in</code> lee silencio) y la consola dice por qué.</li></ul>
+<h2 id="diagnóstico">Diagnóstico</h2>
+<ul><li><strong>Diagnóstico de audio</strong> (botón en la tarjeta Audio) muestra cada salida con su formato, sus periodos en modo compartido y su soporte exclusivo (formato y periodo mínimo). No reproduce nada.</li><li>Desde una terminal:</li></ul>
+<pre><code class="lang-">CsoundVisual.exe --audio-probe
+CsoundVisual.exe --audio-test exclusive minimum UR22</code></pre>
+<p><code>--audio-test [shared|exclusive] [minimum|low|normal] [&quot;parte del nombre&quot;]</code> corre 3 segundos de Csound en silencio por el motor completo e informa el stream, la carga y los cortes.</p>
+<p>Para la entrada:</p>
+<pre><code class="lang-">CsoundVisual.exe --input-probe              (lista las entradas y graba 2 s de la predeterminada)
+CsoundVisual.exe --input-probe UR22 3       (graba 3 s de la entrada de la UR22 y muestra niveles)
+CsoundVisual.exe --input-probe loopback     (graba lo que Windows está reproduciendo: prueba la
+                                             captura aunque el micrófono esté bloqueado)
+CsoundVisual.exe --input-test UR22 5        (motor completo: salida en silencio + entrada al `in`
+                                             de Csound; muestra el RMS que mide Csound y la deriva)</code></pre>
+<p>Ninguno reproduce nada audible. (Como es WinExe, redirige la salida para verla: <code>| more</code>.)</p>
+<h2 id="cómo-funciona-el-ciclo-del-host">Cómo funciona el ciclo del host</h2>
+<ol><li>El dispositivo avisa con su evento: «tengo espacio para N frames».</li><li>El motor corre los ciclos de control de Csound que hagan falta (<code>⌈N / ksmps⌉</code>). En cada uno aplica lo que pidió la interfaz (sliders, eventos, recompilaciones en vivo), llama a <code>csoundPerformKsmps</code> y actualiza medidores, osciloscopio, tiempo y tablas.</li><li>Las muestras se asignan a los canales del dispositivo (el mono se duplica y los canales sobrantes se descartan) y se escalan por <code>1 / 0dbfs</code>.</li><li>Se convierten al formato del dispositivo y se escriben. Se mide el tiempo de DSP del periodo, y se cuenta un corte si supera el periodo o si el buffer compartido quedó vacío.</li><li>Al presionar <em>Detener</em> se escribe un fade-out corto para evitar el clic.</li></ol>
+<p>Con entrada en vivo, el paso 2 además escribe un bloque del audio capturado en <code>spin</code> antes de cada <code>csoundPerformKsmps</code> (ver <em>Entrada de audio en vivo</em>).</p>
+<p>Código: <code>src/CsoundVisual/Audio/WasapiOutput.cs</code>, <code>WasapiInput.cs</code>, <code>InputRingBuffer.cs</code>, <code>WasapiInterop.cs</code>, <code>Engine/CsoundEngine.cs</code> (<code>PerformHost</code>, <code>StartInput</code>, <code>Step</code>).</p>
+  </main>
+</div>
+</body>
+</html>

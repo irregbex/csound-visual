@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hover help &amp; live values · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="on" href="../en/editor-intelligence.html">English</a><a class="" href="../es/inteligencia-del-editor.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Overview</a><a class="" href="user-guide.html">User guide</a><a class="" href="audio-engine.html">Audio engine &amp; latency</a><a class="on" href="editor-intelligence.html">Hover help &amp; live values</a><a class="" href="midi.html">MIDI 2.0 &amp; legacy</a><a class="" href="visual-3d.html">3D views</a><a class="" href="music-tools.html">Piano roll &amp; step sequencer</a><a class="" href="paint-rooms.html">Paint Rooms</a><a class="" href="vst3-cubase.html">Csound in Cubase (VST3)</a><a class="" href="vst3-host.html">VST3 plug-ins in the app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Cabbage instruments</a><a class="" href="architecture.html">Architecture</a><a class="" href="roadmap.html">Roadmap</a></nav></aside>
+  <main class="content">
+<h1 id="hover-help-live-values">Hover help &amp; live values</h1>
+<p><figure class="diagram" role="img" aria-label="Hover help and drag-to-change"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#m); }
+  </style>
+  <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="160" height="60" rx="10"/><text class="t" x="35" y="58">Mouse over token</text><text class="d" x="35" y="78">350 ms rest</text>
+  <rect class="box" x="220" y="30" width="200" height="60" rx="10"/><text class="t" x="235" y="58">CsoundAnalyzer.Inspect</text><text class="d" x="235" y="78">kind · definition · range</text>
+  <rect class="box" x="460" y="30" width="180" height="60" rx="10"/><text class="t" x="475" y="58">Hover card</text><text class="d" x="475" y="78">help · range bar · value</text>
+  <path class="a" d="M180 60 H218"/><path class="a" d="M420 60 H458"/>
+
+  <rect class="box" x="20" y="150" width="160" height="60" rx="10"/><text class="t" x="35" y="178">Press + drag</text><text class="d" x="35" y="198">→ ↑ up · ← ↓ down</text>
+  <rect class="box" x="220" y="120" width="200" height="56" rx="10"/><text class="t" x="235" y="146">Channel token</text><text class="d" x="235" y="164">kcut chnget "cutoff"</text>
+  <rect class="box" x="220" y="190" width="200" height="56" rx="10"/><text class="t" x="235" y="216">Numeric literal</text><text class="d" x="235" y="234">0.25 in instr Voice</text>
+  <rect class="box" x="460" y="120" width="200" height="56" rx="10"/><text class="t" x="475" y="146">Slider + engine</text><text class="d" x="475" y="164">SetControl every cycle</text>
+  <rect class="box" x="460" y="190" width="200" height="56" rx="10"/><text class="t" x="475" y="216">Rewrite text</text><text class="d" x="475" y="234">one undo group</text>
+  <rect class="box" x="700" y="190" width="180" height="56" rx="10"/><text class="t" x="715" y="216">CompileOrc(instr)</text><text class="d" x="715" y="234">throttled 120 ms</text>
+  <path class="a" d="M180 172 H218"/><path class="a" d="M180 190 L218 214"/>
+  <path class="a" d="M420 148 H458"/><path class="a" d="M420 218 H458"/><path class="a" d="M660 218 H698"/>
+
+  <rect class="box" x="20" y="270" width="860" height="44" rx="10"/>
+  <text class="t" x="35" y="297">Esc while dragging → channel restored / undo group reverted (and recompiled) → value before the drag</text>
+</svg>
+<figcaption>Hover help and drag-to-change</figcaption></figure></p>
+<h2 id="the-help-card">The help card</h2>
+<p>Rest the mouse ≈⅓ s on something in the code:</p>
+<table><thead><tr><th>Over…</th><th>The card shows</th></tr></thead><tbody><tr><td>a <strong>variable</strong> (<code>kcut</code>, <code>aL</code>, <code>gaRevL</code>)</td><td>rate (audio/control/init/string, global or local), where it is defined and reassigned, usage count, what it holds (reads a channel, an ADSR envelope 0–1, an oscillator ±amp, a random value between a and b…) and its <strong>possible range</strong></td></tr><tr><td>a <strong>number</strong></td><td>which argument of which opcode it is, the type the opcode expects, a suggested range (cutoff, resonance, pan, ADSR times…), <code>chnk</code> fields, header constants and score p-fields</td></tr><tr><td>a <strong>p-field</strong> (<code>p4</code>)</td><td>its meaning, the values it takes in the score and the expressions passed by <code>schedule</code>/<code>schedulek</code>/<code>event</code></td></tr><tr><td>a <strong>channel name</strong> (<code>&quot;cutoff&quot;</code>)</td><td>its range and current value</td></tr><tr><td>an <strong>opcode</strong></td><td>readable signatures (inputs and outputs)</td></tr></tbody></table>
+<h3 id="live-values">Live values</h3>
+<p>While playing, a variable's card also shows <strong>its value right now</strong>, the minimum and maximum seen, how many notes of the instrument are active and a <strong>sparkline</strong> of the last ≈3 seconds. Audio variables show the block peak.</p>
+<p>It uses the Csound 7 debugger (<code>csoundSetDebugCallback</code>): after each control cycle, about 30 times per second, the app reads the variables of every active instance. With several notes of the same instrument, the most recent one is shown. It can be switched off with <strong>Valores en vivo</strong> in the <em>Observar</em> card.</p>
+<h3 id="watch-panel">Watch panel</h3>
+<p>Right-click a variable › <strong>Observar «name»</strong> pins it in the <em>Observar</em> panel with its live value, range and sparkline. The same menu offers <strong>Go to definition</strong>, <strong>Opcode help (F1)</strong>, undo/redo and cut/copy/paste.</p>
+<h2 id="drag-to-change-values">Drag to change values</h2>
+<p>Press on a variable that reads a channel, a channel name or a number, and move the mouse:</p>
+<ul><li><strong>right or up</strong> increases, <strong>left or down</strong> decreases, clamped to the range;</li><li><strong>Shift</strong> = 10× finer, <strong>Ctrl</strong> = 10× coarser;</li><li><strong>Esc</strong> (before releasing) restores the previous value;</li><li>a click without moving behaves like a normal click.</li></ul>
+<table><thead><tr><th>What you drag</th><th>What changes</th></tr></thead><tbody><tr><td>A variable that reads a channel (<code>kcut chnget &quot;cutoff&quot;</code>) or the channel name</td><td>The channel, in real time, and its slider. The code is not modified.</td></tr><tr><td>A number inside an <code>instr</code></td><td>The number in the code; <strong>while playing the instrument is recompiled</strong> (at most every 120 ms) and new notes use the new value.</td></tr><tr><td>A <code>chnk</code> default value</td><td>The number in the code and the channel live.</td></tr><tr><td>A header or score number</td><td>The number in the code; applied on the next run.</td></tr></tbody></table>
+<p>A whole drag is a single undo step (Ctrl+Z).</p>
+<h2 id="completion-and-manual">Completion and manual</h2>
+<ul><li>After two letters the list appears: variables of the file, keywords and opcodes with their signature. Enter or Tab accepts, Esc closes. <strong>Ctrl+Space</strong> opens it manually.</li><li><strong>F1</strong> on an opcode opens its page in the Csound manual.</li></ul>
+<h2 id="live-coding">Live coding</h2>
+<ul><li><strong>Ctrl+Enter</strong> evaluates the selection or the <code>instr … endin</code> under the caret without stopping the audio (<code>csoundCompileOrc</code>). Evaluated lines flash green.</li><li><strong>Ctrl+Shift+Enter</strong> sends the score line under the caret (or the selected ones) as live events.</li></ul>
+<h2 id="breakpoints">Breakpoints</h2>
+<p>Stop the performance on a line of an instrument and look at every variable of that note.</p>
+<table><thead><tr><th>Action</th><th>How</th></tr></thead><tbody><tr><td>Set / remove a breakpoint</td><td>Click the narrow strip left of the line numbers (a red dot appears), <strong>F9</strong> on the caret line, or right-click › <em>Set breakpoint</em></td></tr><tr><td>Remove all</td><td><strong>Shift+F9</strong>, right-click › <em>Remove all breakpoints</em>, or <em>Remove all</em> in the Debug panel</td></tr><tr><td>Continue</td><td><strong>F5</strong> while paused (F5 is Play otherwise) or <em>Continue</em></td></tr><tr><td>Next control cycle</td><td><strong>F10</strong> while paused or <em>Next cycle</em></td></tr><tr><td>Stop</td><td><em>Stop</em> in the Debug panel, or Shift+F5</td></tr></tbody></table>
+<p>When a note reaches the line, Csound stops <strong>before</strong> that line runs: the device keeps running but plays <strong>silence</strong> (no dropouts are counted), the line turns yellow with an arrow in the gutter, the editor scrolls to it, the status bar says «⏸ Paused at line 42 · instr Voice · F5 continue» and the <strong>Debug</strong> panel opens over the right side of the editor with:</p>
+<ul><li>the instrument, the line and the opcode about to run, which note it is («note 2 of 3»), p1, p2, p3, the score time and Csound's control-cycle counter;</li><li>every local variable (name, rate, value): <code>i</code>/<code>k</code> as numbers, <code>a</code> as RMS and peak of the block plus its first samples, arrays with their first elements, <code>S</code> strings, f-signals with the FFT size and the strongest bin; then the globals (<code>gk…</code>, <code>ga…</code>, <code>gi…</code>).</li></ul>
+<p><strong>Continue vs. next cycle.</strong> A line runs once per control cycle (hundreds of times per second), so <em>Continue</em> only stops where a note has <strong>not</strong> stopped yet: another breakpoint line, another note playing at the same time, or the next new note. <em>Next cycle</em> stops at the next breakpoint reached, at the latest the same line one control cycle (ksmps samples) later, so you can watch an envelope move step by step.</p>
+<p>Where it works:</p>
+<ul><li>only lines inside <code>instr … endin</code> that run at k- or a-rate. Lines that only run when the note starts (<code>ifreq = p4</code>), the <code>instr</code>/<code>endin</code> lines, blank lines, comments, header code and UDO bodies cannot stop: clicking them explains why in the status bar. Breakpoints in an instrument that calls a UDO go on the calling line;</li><li>only while <strong>playing</strong> with the app's own audio engine (Settings › Audio › Windows · WASAPI). Rendering to WAV, or a Csound module (PortAudio/ASIO), ignores them and says so once in the console;</li><li>breakpoints belong to the open file, follow their lines while you edit and last for the session (they are not saved in the .csd).</li></ul>
+<p>Breakpoints set while playing take effect immediately when <em>Live values</em> is on (the default), because both features share Csound's debugger. With <em>Live values</em> off, set at least one breakpoint before pressing Play.</p>
+<p><strong>Editing while paused or playing.</strong> Csound's line numbers are those of the code that is running. If you insert lines above an instrument, the app still knows where each running line is now (a stop is shown on the right line). <strong>Ctrl+Enter</strong> (or dragging a number) recompiles the instrument numbered like the editor shows it now, and the breakpoints of that instrument are moved to the new code. A recompile requested while paused is applied when you continue.</p>
+<p>Limits of the Csound 7.0 debugger (verified, worked around where possible):</p>
+<ul><li>it can only stop <em>before</em> a line, not between the opcodes of one line, and there is no «step into a UDO» or «step to the next line»: <em>Next cycle</em> is the finest step;</li><li>expression helpers are sometimes tagged with the next line (a breakpoint on <code>kcut = 500 + kenv * 2000</code> may stop at <code>=</code> while the <code>*</code> belongs to the next line);</li><li>resuming in the middle of a line with several opcodes would stop again forever at the same opcode, and Csound reports the wrong note for later stops in the same cycle; the app removes the line for the rest of that cycle and reinstalls it before the next one;</li><li>when two notes of the same instrument stop in the same cycle, the panel shows the first one.</li></ul>
+<p>Self-test (no sound, uses the real WASAPI engine muted): <code>CsoundVisual.exe --breakpoint-test file.csd LINE [SHIFT]</code> prints the variables at each stop and checks pause, time frozen without dropouts, next cycle, continue to another note, a recompile shifted by SHIFT lines, remove all and stop while paused.</p>
+<p>Source: <code>src/CsoundVisual/Editor/</code> (<code>CsoundAnalyzer</code>, <code>ScrubController</code>, <code>CompletionProvider</code>) and <code>Engine/LiveValueMonitor.cs</code>; breakpoints: <code>Editor/Breakpoints.cs</code>, <code>Engine/BreakpointSession.cs</code>, <code>Engine/CsoundEngine.Debugger.cs</code>, <code>ViewModels/MainViewModel.Debug.cs</code>, <code>Views/DebugPanel.cs</code>.</p>
+  </main>
+</div>
+</body>
+</html>

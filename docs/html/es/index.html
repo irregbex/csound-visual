@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resumen · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="" href="../en/index.html">English</a><a class="on" href="../es/index.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="on" href="index.html">Resumen</a><a class="" href="guia-de-usuario.html">Guía de usuario</a><a class="" href="motor-de-audio.html">Motor de audio y latencia</a><a class="" href="inteligencia-del-editor.html">Ayuda al pasar el mouse y valores en vivo</a><a class="" href="midi.html">MIDI 2.0 y clásico</a><a class="" href="visual-3d.html">Vistas 3D</a><a class="" href="herramientas-musicales.html">Piano roll y secuenciador</a><a class="" href="salas-de-pintura.html">Paint Rooms (pintar sonido)</a><a class="" href="vst3-cubase.html">Csound en Cubase (VST3)</a><a class="" href="host-vst3.html">Plugins VST3 en la app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Instrumentos Cabbage</a><a class="" href="arquitectura.html">Arquitectura</a><a class="" href="hoja-de-ruta.html">Hoja de ruta</a></nav></aside>
+  <main class="content">
+<h1 id="csound-visual">Csound Visual</h1>
+<p><strong>Csound Visual</strong> es un entorno gráfico para hacer música con <a href="https://csound.com">Csound 7</a> en Windows. Lo escribes en código y lo tocas, lo ves y lo controlas en vivo: cada variable, número o canal del código se puede inspeccionar y arrastrar mientras suena.</p>
+<p><figure class="diagram" role="img" aria-label="Capas de Csound Visual"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .ext { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .t { fill: var(--text, #a8ccff); }
+    .h { fill: var(--accent-hi, #5aa0ff); font-weight: 600; font-size: 15px; }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/>
+    </marker>
+  </defs>
+
+  <!-- Views -->
+  <rect class="box" x="30" y="20" width="840" height="70" rx="12"/>
+  <text class="h" x="50" y="48">Views (Avalonia 12)</text>
+  <text class="d" x="50" y="70">MainWindow · editor AvaloniaEdit · meters · scope · tables · dialogs · tooltips</text>
+
+  <!-- ViewModels -->
+  <rect class="box" x="30" y="120" width="840" height="70" rx="12"/>
+  <text class="h" x="50" y="148">ViewModels (CommunityToolkit.Mvvm)</text>
+  <text class="d" x="50" y="170">MainViewModel (+ .Audio) · DocumentViewModel (tabs) · ChannelControlViewModel (sliders) · AppSettings</text>
+
+  <!-- Middle layer -->
+  <rect class="box" x="30" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="50" y="248">Editor</text>
+  <text class="d" x="50" y="270">CsoundAnalyzer (code insight)</text>
+  <text class="d" x="50" y="288">ScrubController (hover + drag)</text>
+  <text class="d" x="50" y="306">OpcodeIndex · renderers</text>
+
+  <rect class="box" x="315" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="335" y="248">Engine</text>
+  <text class="d" x="335" y="270">CsoundEngine (performance thread)</text>
+  <text class="d" x="335" y="288">CsdTools (options, channels)</text>
+  <text class="d" x="335" y="306">Step(): requests → ksmps → analysis</text>
+
+  <rect class="box" x="600" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="620" y="248">Audio</text>
+  <text class="d" x="620" y="270">WasapiOutput (shared / exclusive)</text>
+  <text class="d" x="620" y="288">IAudioClient3 · MMCSS "Pro Audio"</text>
+  <text class="d" x="620" y="306">Probe · format conversion</text>
+
+  <!-- Interop -->
+  <rect class="box" x="30" y="360" width="840" height="60" rx="12"/>
+  <text class="h" x="50" y="386">Interop</text>
+  <text class="d" x="50" y="406">CsoundNative (P/Invoke) · CsoundLocator (finds the installation) · CsoundCatalog (opcodes, devices) · WasapiInterop (COM)</text>
+
+  <!-- External -->
+  <rect class="ext" x="30" y="450" width="410" height="50" rx="12"/>
+  <text class="t" x="50" y="481">csound7_64.dll  +  plugins64 (PortAudio, OSC, MIDI…)</text>
+  <rect class="ext" x="460" y="450" width="410" height="50" rx="12"/>
+  <text class="t" x="480" y="481">Windows Core Audio (WASAPI) → audio device</text>
+
+  <!-- arrows -->
+  <path class="a" d="M450 90 V118"/>
+  <path class="a" d="M165 190 V218"/>
+  <path class="a" d="M450 190 V218"/>
+  <path class="a" d="M735 190 V218"/>
+  <path class="a" d="M450 330 V358"/>
+  <path class="a" d="M585 275 H598"/>
+  <path class="a" d="M235 420 V448"/>
+  <path class="a" d="M665 420 V448"/>
+</svg>
+<figcaption>Capas de Csound Visual</figcaption></figure></p>
+<h2 id="qué-puedes-hacer">Qué puedes hacer</h2>
+<table><thead><tr><th>Área</th><th>Funciones</th></tr></thead><tbody><tr><td><strong>Editor</strong></td><td>Pestañas, resaltado de sintaxis de los ≈2500 opcodes reales, autocompletado con firmas, F1 abre el manual, marca de errores en la línea, aviso de cambios sin guardar.</td></tr><tr><td><strong>Ayuda viva</strong></td><td>Pasa el mouse sobre una variable o un número: qué es, dónde se define, su rango y <strong>su valor en vivo</strong> con una mini gráfica. Arrástralo para cambiarlo; Esc vuelve al valor anterior.</td></tr><tr><td><strong>Audio</strong></td><td>Motor WASAPI propio: compartido (convive con otras apps) o exclusivo (≈3 ms). PortAudio/ASIO también disponible. Diagnóstico de cada dispositivo.</td></tr><tr><td><strong>Tocar en vivo</strong></td><td>Sliders automáticos para cada canal, MIDI learn, teclado en pantalla y del PC, entrada MIDI (WinMM; MIDI 2.0 en camino).</td></tr><tr><td><strong>Live coding</strong></td><td>Ctrl+Enter recompila el instrumento bajo el cursor sin cortar el audio; Ctrl+Shift+Enter envía líneas de partitura.</td></tr><tr><td><strong>Ver</strong></td><td>Osciloscopio, espectro, medidores de pico, tablas, panel <em>Observar</em> con variables fijadas.</td></tr><tr><td><strong>Guardar el resultado</strong></td><td>Grabar lo que suena (con tus cambios en vivo) o renderizar el archivo a WAV.</td></tr></tbody></table>
+<h2 id="empezar-en-1-minuto">Empezar en 1 minuto</h2>
+<ol><li>Abre <code>CsoundVisual.exe</code> (o en VS Code: <em>Tasks: Run Task › Csound Visual: ejecutar</em>).</li><li>Presiona <strong>Tocar</strong> (F5). Suena el demo.</li><li>Mueve los sliders de <strong>Controles en vivo</strong>, toca el <strong>teclado</strong> de abajo o tu controlador MIDI.</li><li>Pasa el mouse sobre <code>kcut</code> en el código y arrástralo hacia la izquierda.</li></ol>
+<p>Sigue con la <a href="guia-de-usuario.html">guía de usuario</a>.</p>
+  </main>
+</div>
+</body>
+</html>

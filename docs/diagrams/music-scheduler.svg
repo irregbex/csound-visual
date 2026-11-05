@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .fut { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#ms); }
+    .l { stroke: var(--dim, #5a7bb8); stroke-width: 1; }
+  </style>
+  <defs><marker id="ms" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="200" height="60" rx="10"/><text class="t" x="35" y="57">Piano roll</text><text class="d" x="35" y="77">RollPattern snapshot</text>
+  <rect class="box" x="20" y="110" width="200" height="60" rx="10"/><text class="t" x="35" y="137">Step sequencer</text><text class="d" x="35" y="157">StepPattern copy · swing</text>
+
+  <rect class="box" x="290" y="55" width="250" height="100" rx="12"/>
+  <text class="t" x="305" y="82">TransportScheduler (thread)</text>
+  <text class="d" x="305" y="104">every ~4 ms: notes starting before</text>
+  <text class="d" x="305" y="121">scoreTime + 120 ms → absolute time</text>
+  <text class="d" x="305" y="138">loop passes · tempo re-anchoring</text>
+
+  <rect class="box" x="610" y="30" width="270" height="60" rx="10"/><text class="t" x="625" y="57">CsoundEngine.SendEventAt</text><text class="d" x="625" y="77">queue (at, instr, dur, p4 p5)</text>
+  <rect class="box" x="610" y="120" width="270" height="70" rx="10"/><text class="t" x="625" y="147">Performance thread, each k-cycle</text><text class="d" x="625" y="167">p2 = at − scoreTime → csoundEventString</text><text class="d" x="625" y="183">i 1 0.0315 0.139 36 0.9449</text>
+
+  <path class="a" d="M220 60 C255 60 255 90 288 90"/>
+  <path class="a" d="M220 140 C255 140 255 120 288 120"/>
+  <path class="a" d="M540 80 C575 80 575 60 608 60"/>
+  <path class="a" d="M745 90 V118"/>
+  <path class="a" d="M610 175 C500 230 420 210 415 158"/>
+  <text class="d" x="440" y="232">score clock (csoundGetScoreTime)</text>
+
+  <line class="l" x1="40" y1="300" x2="860" y2="300"/>
+  <line class="l" x1="120" y1="292" x2="120" y2="308"/><text class="d" x="96" y="325">now</text>
+  <line class="l" x1="300" y1="292" x2="300" y2="308"/><text class="d" x="258" y="325">now + 120 ms</text>
+  <rect x="120" y="294" width="180" height="12" fill="#1e6bff" opacity="0.25"/>
+  <circle cx="160" cy="300" r="5" fill="#1e6bff"/><circle cx="215" cy="300" r="5" fill="#1e6bff"/><circle cx="270" cy="300" r="5" fill="#1e6bff"/>
+  <circle cx="355" cy="300" r="5" fill="none" stroke="#5a7bb8"/><circle cx="440" cy="300" r="5" fill="none" stroke="#5a7bb8"/>
+  <text class="d" x="470" y="296">notes in the window are queued now; later ones on the next passes</text>
+  <text class="d" x="20" y="360">The tools never use the wall clock to place notes: they follow Csound's score time, so audio and notes cannot drift apart.</text>
+</svg>

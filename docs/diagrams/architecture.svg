@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .ext { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .t { fill: var(--text, #a8ccff); }
+    .h { fill: var(--accent-hi, #5aa0ff); font-weight: 600; font-size: 15px; }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/>
+    </marker>
+  </defs>
+
+  <!-- Views -->
+  <rect class="box" x="30" y="20" width="840" height="70" rx="12"/>
+  <text class="h" x="50" y="48">Views (Avalonia 12)</text>
+  <text class="d" x="50" y="70">MainWindow · editor AvaloniaEdit · meters · scope · tables · dialogs · tooltips</text>
+
+  <!-- ViewModels -->
+  <rect class="box" x="30" y="120" width="840" height="70" rx="12"/>
+  <text class="h" x="50" y="148">ViewModels (CommunityToolkit.Mvvm)</text>
+  <text class="d" x="50" y="170">MainViewModel (+ .Audio) · DocumentViewModel (tabs) · ChannelControlViewModel (sliders) · AppSettings</text>
+
+  <!-- Middle layer -->
+  <rect class="box" x="30" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="50" y="248">Editor</text>
+  <text class="d" x="50" y="270">CsoundAnalyzer (code insight)</text>
+  <text class="d" x="50" y="288">ScrubController (hover + drag)</text>
+  <text class="d" x="50" y="306">OpcodeIndex · renderers</text>
+
+  <rect class="box" x="315" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="335" y="248">Engine</text>
+  <text class="d" x="335" y="270">CsoundEngine (performance thread)</text>
+  <text class="d" x="335" y="288">CsdTools (options, channels)</text>
+  <text class="d" x="335" y="306">Step(): requests → ksmps → analysis</text>
+
+  <rect class="box" x="600" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="620" y="248">Audio</text>
+  <text class="d" x="620" y="270">WasapiOutput (shared / exclusive)</text>
+  <text class="d" x="620" y="288">IAudioClient3 · MMCSS "Pro Audio"</text>
+  <text class="d" x="620" y="306">Probe · format conversion</text>
+
+  <!-- Interop -->
+  <rect class="box" x="30" y="360" width="840" height="60" rx="12"/>
+  <text class="h" x="50" y="386">Interop</text>
+  <text class="d" x="50" y="406">CsoundNative (P/Invoke) · CsoundLocator (finds the installation) · CsoundCatalog (opcodes, devices) · WasapiInterop (COM)</text>
+
+  <!-- External -->
+  <rect class="ext" x="30" y="450" width="410" height="50" rx="12"/>
+  <text class="t" x="50" y="481">csound7_64.dll  +  plugins64 (PortAudio, OSC, MIDI…)</text>
+  <rect class="ext" x="460" y="450" width="410" height="50" rx="12"/>
+  <text class="t" x="480" y="481">Windows Core Audio (WASAPI) → audio device</text>
+
+  <!-- arrows -->
+  <path class="a" d="M450 90 V118"/>
+  <path class="a" d="M165 190 V218"/>
+  <path class="a" d="M450 190 V218"/>
+  <path class="a" d="M735 190 V218"/>
+  <path class="a" d="M450 330 V358"/>
+  <path class="a" d="M585 275 H598"/>
+  <path class="a" d="M235 420 V448"/>
+  <path class="a" d="M665 420 V448"/>
+</svg>

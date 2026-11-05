@@ -1,0 +1,115 @@
+<!--
+  Audio settings (engine, output device, latency, ksmps, Windows Sound panel, diagnostics).
+  Lives in the «Configuración / Settings» window; it used to be a card of the side panel.
+  DataContext: MainViewModel (set by SettingsWindow.AudioSection); logic in MainViewModel.Audio.cs.
+  Every picker is disabled while Csound runs (IsEnabled = IsIdle): device, backend, latency and
+  ksmps are only read when a performance starts. Texts come from the localisation table
+  ({l:T key} → Localization/Strings.cs), so the view switches language without code.
+  Regions, top to bottom: loading hint, engine (backend), output device, live input, latency +
+  ksmps (two columns), Windows Sound panel button, diagnostics button, stream info line.
+-->
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CsoundVisual.ViewModels"
+             xmlns:interop="using:CsoundVisual.Interop"
+             xmlns:l="using:CsoundVisual.Localization"
+             x:Class="CsoundVisual.Views.AudioSettingsView"
+             x:DataType="vm:MainViewModel">
+  <StackPanel Spacing="8">
+    <!-- "Loading devices…" while the backend's device list is enumerated in the background. -->
+    <TextBlock Classes="dim" FontSize="11" Text="{l:T MW068}" IsVisible="{Binding IsLoadingDevices}" />
+    <!-- Audio engine: the app's own WASAPI engine (shared/exclusive) or one of Csound's
+         -+rtaudio modules (PortAudio, …). Each item shows its Hint as a tooltip. -->
+    <TextBlock Classes="dim" FontSize="11" Text="{l:T MW069}" />
+    <ComboBox ItemsSource="{Binding AudioBackends}" SelectedItem="{Binding SelectedAudioBackend}"
+              HorizontalAlignment="Stretch" IsEnabled="{Binding IsIdle}"
+              ToolTip.Tip="{l:T MW070}">
+      <ComboBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:AudioBackend">
+          <TextBlock Text="{Binding Label}" ToolTip.Tip="{Binding Hint}" TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
+    <!-- Output device of the selected engine (list refilled when the engine changes). -->
+    <TextBlock Classes="dim" FontSize="11" Text="{l:T MW071}" />
+    <ComboBox ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding SelectedOutputDevice}"
+              HorizontalAlignment="Stretch" IsEnabled="{Binding IsIdle}"
+              ToolTip.Tip="{l:T MW072}">
+      <ComboBox.ItemTemplate>
+        <DataTemplate x:DataType="interop:AudioDevice">
+          <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Display}" />
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
+    <!-- Live audio input (app WASAPI engine only): feeds Csound's `in` / `inch`. «None» by default. -->
+    <TextBlock Classes="dim" FontSize="11" Text="{l:T Audio.Input}" ToolTip.Tip="{l:T Audio.InputTip}" />
+    <ComboBox ItemsSource="{Binding InputDevices}" SelectedItem="{Binding SelectedInputDevice}"
+              HorizontalAlignment="Stretch" IsEnabled="{Binding IsIdle}"
+              ToolTip.Tip="{l:T Audio.InputTip}">
+      <ComboBox.ItemTemplate>
+        <DataTemplate x:DataType="interop:AudioDevice">
+          <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Display}" />
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
+    <!-- «Input channels»: how a stereo interface's two inputs reach Csound (stereo pair, or one
+         input copied to both sides). Index = Audio.InputRouting value; applied live, so it stays
+         enabled while playing. -->
+    <TextBlock Classes="dim" FontSize="11" Text="{l:T Audio.InputRouting}" ToolTip.Tip="{l:T Audio.InputRoutingTip}" />
+    <ComboBox ItemsSource="{Binding InputRoutingChoices}" SelectedIndex="{Binding InputRoutingIndex}"
+              HorizontalAlignment="Stretch" ToolTip.Tip="{l:T Audio.InputRoutingTip}" />
+    <!-- Warning shown only when a Csound backend (not the app's WASAPI engine) is selected:
+         live input is implemented by the app's host audio I/O only. -->
+    <TextBlock Classes="dim" FontSize="10.5" TextWrapping="Wrap" Text="{l:T Audio.InputHostOnly}"
+               IsVisible="{Binding !IsHostBackend}" ToolTip.Tip="{l:T Audio.InputTip}" />
+    <!-- Two equal columns (8 px gutter): latency preset (buffer/period size) and ksmps override
+         (samples per control cycle; "from the file" keeps the .csd value). -->
+    <Grid ColumnDefinitions="*,8,*">
+      <StackPanel Spacing="4">
+        <TextBlock Classes="dim" FontSize="11" Text="{l:T MW073}" />
+        <ComboBox ItemsSource="{Binding LatencyOptions}" SelectedItem="{Binding SelectedLatency}"
+                  HorizontalAlignment="Stretch" IsEnabled="{Binding IsIdle}"
+                  ToolTip.Tip="{l:T MW074}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:LatencyOption">
+              <TextBlock Text="{Binding Label}" ToolTip.Tip="{Binding Hint}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </StackPanel>
+      <StackPanel Grid.Column="2" Spacing="4">
+        <TextBlock Classes="dim" FontSize="11" Text="ksmps" />
+        <ComboBox ItemsSource="{Binding KsmpsOptions}" SelectedItem="{Binding SelectedKsmps}"
+                  HorizontalAlignment="Stretch" IsEnabled="{Binding IsIdle}"
+                  ToolTip.Tip="{l:T MW075}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:KsmpsOption">
+              <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+    <!-- Opens the classic Windows Sound control panel (mmsys.cpl), where the device rate is set. -->
+    <Button Classes="tool" HorizontalAlignment="Left" Padding="8,5" Command="{Binding OpenSoundPanelCommand}"
+            ToolTip.Tip="{l:T MW076}">
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <PathIcon Data="{StaticResource IconPanel}" Width="12" Height="12" />
+        <TextBlock Text="{l:T MW077}" FontSize="12" />
+      </StackPanel>
+    </Button>
+    <!-- Audio diagnostics report (device formats, periods), shown in an InfoDialog. -->
+    <Button Classes="tool" HorizontalAlignment="Left" Padding="8,5" Command="{Binding AudioDiagnosticsCommand}"
+            ToolTip.Tip="{l:T MW078}">
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <PathIcon Data="{StaticResource IconRefresh}" Width="12" Height="12" />
+        <TextBlock Text="{l:T MW079}" FontSize="12" />
+      </StackPanel>
+    </Button>
+    <!-- Stream actually opened by the last/current performance ("device N Hz · Csound sr M Hz",
+         period, mode); hidden while empty. -->
+    <TextBlock Classes="dim" FontSize="11" TextWrapping="Wrap" Text="{Binding AudioStreamInfo}"
+               IsVisible="{Binding AudioStreamInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+               ToolTip.Tip="{l:T MW080}" />
+  </StackPanel>
+</UserControl>

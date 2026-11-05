@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D views · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="on" href="../en/visual-3d.html">English</a><a class="" href="../es/visual-3d.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Overview</a><a class="" href="user-guide.html">User guide</a><a class="" href="audio-engine.html">Audio engine &amp; latency</a><a class="" href="editor-intelligence.html">Hover help &amp; live values</a><a class="" href="midi.html">MIDI 2.0 &amp; legacy</a><a class="on" href="visual-3d.html">3D views</a><a class="" href="music-tools.html">Piano roll &amp; step sequencer</a><a class="" href="paint-rooms.html">Paint Rooms</a><a class="" href="vst3-cubase.html">Csound in Cubase (VST3)</a><a class="" href="vst3-host.html">VST3 plug-ins in the app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Cabbage instruments</a><a class="" href="architecture.html">Architecture</a><a class="" href="roadmap.html">Roadmap</a></nav></aside>
+  <main class="content">
+<h1 id="3d-views-opengl">3D views (OpenGL)</h1>
+<p>Open them with <strong>3D</strong> in the toolbar (Ctrl+3). The window is independent: move it to a second monitor or projector and press <strong>F11</strong> for full screen (F11 or Esc to return).</p>
+<p><figure class="diagram" role="img" aria-label="3D pipeline"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#gm); }
+  </style>
+  <defs><marker id="gm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="170" height="64" rx="10"/><text class="t" x="35" y="57">CsoundEngine</text><text class="d" x="35" y="77">scope ring · sr</text>
+  <rect class="box" x="220" y="30" width="170" height="64" rx="10"/><text class="t" x="235" y="57">AudioFeed</text><text class="d" x="235" y="77">30 Hz copy (UI timer)</text>
+  <rect class="box" x="420" y="20" width="200" height="84" rx="10"/><text class="t" x="435" y="47">IScene3D</text><text class="d" x="435" y="67">Waterfall · XYZ pad</text><text class="d" x="435" y="85">Spatial (binaural)</text>
+  <rect class="box" x="650" y="20" width="230" height="84" rx="10"/><text class="t" x="665" y="47">GlRenderer</text><text class="d" x="665" y="67">lines · triangles · points</text><text class="d" x="665" y="85">1 shader · dynamic VBO</text>
+
+  <rect class="box" x="420" y="160" width="200" height="70" rx="10"/><text class="t" x="435" y="188">GlView</text><text class="d" x="435" y="208">OpenGlControlBase · camera</text>
+  <rect class="box" x="650" y="160" width="230" height="70" rx="10"/><text class="t" x="665" y="188">OpenGL ES 3 (ANGLE)</text><text class="d" x="665" y="208">Direct3D 11 · GPU</text>
+  <rect class="box" x="20" y="160" width="370" height="70" rx="10"/><text class="t" x="35" y="188">Mouse → scene → channels</text><text class="d" x="35" y="208">XYZ → SetChannelNormalized · az/el/dist → SendChannel</text>
+
+  <path class="a" d="M190 62 H218"/><path class="a" d="M390 62 H418"/><path class="a" d="M620 62 H648"/>
+  <path class="a" d="M520 104 V158"/><path class="a" d="M620 195 H648"/><path class="a" d="M420 195 H392"/>
+  <text class="d" x="20" y="275">If context creation, shaders or the context itself fail, GlView raises Failed and the window shows an explanation instead of crashing.</text>
+</svg>
+<figcaption>3D pipeline</figcaption></figure></p>
+<h2 id="scenes">Scenes</h2>
+<table><thead><tr><th>Scene</th><th>What it shows / does</th><th>Controls</th></tr></thead><tbody><tr><td><strong>Espectrograma en cascada</strong></td><td>The output spectrum as a terrain: the front row is now, older rows recede and fade. Numbered axes: <strong>frequency in Hz</strong> (50 … 20k, logarithmic), <strong>level in dBFS</strong> (−90 … 0) and <strong>time</strong> (now, −1 s, −2 s…). <strong>Colores</strong> picker: Amber, Viridis, Magma, Inferno, Rainbow (Turbo), Ice, Greyscale (remembered). <strong>Resolution</strong> pickers: bands (32–256), rows per second (10–60) and seconds of history (2–20); the bottom bar shows the analysis (FFT 2048 samples ≈ 43 ms, Hz per bin, real rows/s) and the GPU frame rate.</td><td>Drag to orbit, wheel to zoom, double-click or «Vista inicial» to reset.</td></tr><tr><td><strong>Pad XYZ</strong></td><td>A sphere in a cube controls <strong>three channels at once</strong> (chosen in the X/Y/Z pickers; each axis spans its slider's range, exponentially for exponential channels). Projections to the floor and walls and a fading trail show the gesture.</td><td>Left-drag: X (horizontal) and Y (vertical). Shift+drag or wheel: Z. Right-drag orbits, Ctrl+wheel zooms. The cube edges show each channel's name with its minimum and maximum, and the sphere its current values. «Controla: …» names the document whose sliders are driven (the one shown in the main window); when the pad opens or the document changes, the sphere moves to where the sliders are, without changing them.</td></tr><tr><td><strong>Panorámica espacial (binaural)</strong></td><td>A listener's head (nose = front) and a sound source you place around it. Sends <strong>az</strong> (0° front, clockwise), <strong>el</strong> (−40°…90°) and <strong>dist</strong> to the channels with those names.</td><td>Drag on the floor; Shift+drag or wheel: height.</td></tr></tbody></table>
+<p><strong>Abrir plantilla binaural</strong> opens <code>Binaural3D.csd</code>: a pulsed source spatialised with <code>hrtfmove2</code>, using the HRTF data that ships with Csound (<code>samples\hrtf-*-left/right.dat</code>, chosen by <code>sr</code>). Distance lowers the level and darkens the sound. Listen with headphones.</p>
+<h2 id="technology">Technology</h2>
+<ul><li><strong>Avalonia <code>OpenGlControlBase</code></strong>: Avalonia owns the context. On Windows that is <strong>OpenGL ES 3.0 over ANGLE / Direct3D 11</strong>, the most robust path across GPUs and drivers. Verified on the development PC: <em>OpenGL ES 3.0 · ANGLE (NVIDIA GeForce RTX 3090 Ti, Direct3D11)</em>.</li><li><strong>Silk.NET.OpenGLES 2.23</strong> loads the GL functions from Avalonia's context (<code>GL.GetApi(GetProcAddress)</code>).</li><li><strong>GlRenderer</strong>: one shader (position + colour), one dynamic vertex buffer, lines, triangles and points, alpha blending and depth test. The shader header switches between GLSL ES 3.00 and GLSL 3.30 for desktop GL.</li><li><strong>GlView</strong>: orbit camera (System.Numerics matrices), continuous redraw (<code>RequestNextFrameRendering</code>), mouse routing to the scene.</li><li><strong>LabelOverlay</strong>: axis numbers and names are drawn with Avalonia text over the GPU image, projected with the same camera (<code>GlView.ViewProjection</code>), so they stick to the geometry.</li><li><strong>Bug fixed (2026-11-03)</strong>: the GL image lives in a child composition visual, so the control had no content of its own and Avalonia's hit test went through it: the mouse never arrived (no orbiting, no dragging). <code>GlView</code> now implements <code>ICustomHitTest</code>.</li><li><strong>AudioFeed</strong>: a 30 Hz UI timer copies the engine's output buffer. The audio thread is never touched by the GPU code.</li><li><strong>Robustness</strong>: failures in context creation, shader compilation or rendering, and context loss, raise <code>Failed</code>. The window then explains the problem and the 2D views keep working. Closing the main window also closes the 3D window.</li></ul>
+<h2 id="ideas-for-later">Ideas for later</h2>
+<p>Vulkan through Avalonia <code>GpuInterop</code> if OpenGL ever falls short; a stereo 3D scope (L/R phase spiral); a wavetable 3D surface; a performance visualiser driven by channels and spectrum bands; a 3D instrument graph.</p>
+<p>Source: <code>src/CsoundVisual/Visual3D/</code> (<code>GlView</code>, <code>GlRenderer</code>, <code>Scenes</code>) and <code>Views/Visual3DWindow.cs</code>.</p>
+  </main>
+</div>
+</body>
+</html>

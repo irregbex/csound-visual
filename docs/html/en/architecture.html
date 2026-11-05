@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="on" href="../en/architecture.html">English</a><a class="" href="../es/arquitectura.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Overview</a><a class="" href="user-guide.html">User guide</a><a class="" href="audio-engine.html">Audio engine &amp; latency</a><a class="" href="editor-intelligence.html">Hover help &amp; live values</a><a class="" href="midi.html">MIDI 2.0 &amp; legacy</a><a class="" href="visual-3d.html">3D views</a><a class="" href="music-tools.html">Piano roll &amp; step sequencer</a><a class="" href="paint-rooms.html">Paint Rooms</a><a class="" href="vst3-cubase.html">Csound in Cubase (VST3)</a><a class="" href="vst3-host.html">VST3 plug-ins in the app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Cabbage instruments</a><a class="on" href="architecture.html">Architecture</a><a class="" href="roadmap.html">Roadmap</a></nav></aside>
+  <main class="content">
+<h1 id="architecture">Architecture</h1>
+<p>Csound Visual is a C# (.NET 10) desktop application built with Avalonia 12, AvaloniaEdit and CommunityToolkit.Mvvm. It hosts the native Csound 7 library (<code>csound7_64.dll</code>, 64-bit doubles) through P/Invoke. Windows only.</p>
+<p><figure class="diagram" role="img" aria-label="Layers of Csound Visual"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .ext { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .t { fill: var(--text, #a8ccff); }
+    .h { fill: var(--accent-hi, #5aa0ff); font-weight: 600; font-size: 15px; }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/>
+    </marker>
+  </defs>
+
+  <!-- Views -->
+  <rect class="box" x="30" y="20" width="840" height="70" rx="12"/>
+  <text class="h" x="50" y="48">Views (Avalonia 12)</text>
+  <text class="d" x="50" y="70">MainWindow · editor AvaloniaEdit · meters · scope · tables · dialogs · tooltips</text>
+
+  <!-- ViewModels -->
+  <rect class="box" x="30" y="120" width="840" height="70" rx="12"/>
+  <text class="h" x="50" y="148">ViewModels (CommunityToolkit.Mvvm)</text>
+  <text class="d" x="50" y="170">MainViewModel (+ .Audio) · DocumentViewModel (tabs) · ChannelControlViewModel (sliders) · AppSettings</text>
+
+  <!-- Middle layer -->
+  <rect class="box" x="30" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="50" y="248">Editor</text>
+  <text class="d" x="50" y="270">CsoundAnalyzer (code insight)</text>
+  <text class="d" x="50" y="288">ScrubController (hover + drag)</text>
+  <text class="d" x="50" y="306">OpcodeIndex · renderers</text>
+
+  <rect class="box" x="315" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="335" y="248">Engine</text>
+  <text class="d" x="335" y="270">CsoundEngine (performance thread)</text>
+  <text class="d" x="335" y="288">CsdTools (options, channels)</text>
+  <text class="d" x="335" y="306">Step(): requests → ksmps → analysis</text>
+
+  <rect class="box" x="600" y="220" width="270" height="110" rx="12"/>
+  <text class="h" x="620" y="248">Audio</text>
+  <text class="d" x="620" y="270">WasapiOutput (shared / exclusive)</text>
+  <text class="d" x="620" y="288">IAudioClient3 · MMCSS "Pro Audio"</text>
+  <text class="d" x="620" y="306">Probe · format conversion</text>
+
+  <!-- Interop -->
+  <rect class="box" x="30" y="360" width="840" height="60" rx="12"/>
+  <text class="h" x="50" y="386">Interop</text>
+  <text class="d" x="50" y="406">CsoundNative (P/Invoke) · CsoundLocator (finds the installation) · CsoundCatalog (opcodes, devices) · WasapiInterop (COM)</text>
+
+  <!-- External -->
+  <rect class="ext" x="30" y="450" width="410" height="50" rx="12"/>
+  <text class="t" x="50" y="481">csound7_64.dll  +  plugins64 (PortAudio, OSC, MIDI…)</text>
+  <rect class="ext" x="460" y="450" width="410" height="50" rx="12"/>
+  <text class="t" x="480" y="481">Windows Core Audio (WASAPI) → audio device</text>
+
+  <!-- arrows -->
+  <path class="a" d="M450 90 V118"/>
+  <path class="a" d="M165 190 V218"/>
+  <path class="a" d="M450 190 V218"/>
+  <path class="a" d="M735 190 V218"/>
+  <path class="a" d="M450 330 V358"/>
+  <path class="a" d="M585 275 H598"/>
+  <path class="a" d="M235 420 V448"/>
+  <path class="a" d="M665 420 V448"/>
+</svg>
+<figcaption>Layers of Csound Visual</figcaption></figure></p>
+<h2 id="repository-layout">Repository layout</h2>
+<pre><code class="lang-">CSound Visual.code-workspace   VS Code workspace (two folders + Csound tasks)
+.vscode/                       Folder settings (dark yellow theme), build/run tasks
+@Source/Csound7/               Binary Csound 7.0 installation (DLL, headers, plugins, examples) — not modified
+src/CsoundVisual.slnx          Solution
+src/CsoundVisual/
+  Program.cs, App.axaml(.cs)   Entry point (+ --audio-probe / --audio-test), theme, main window
+  Audio/                       Own WASAPI output: WasapiOutput (shared/exclusive), WasapiInterop (COM)
+  Interop/                     CsoundNative (P/Invoke), CsoundLocator, CsoundCatalog (opcodes, devices)
+  Engine/                      CsoundEngine (performance thread), LiveValueMonitor, WavRecorder, CsdTools
+  Midi/                        MidiMessage (high-res), WinMmMidiInput, MidiHub
+  Music/                       Stage 4 tools: TransportScheduler (look-ahead, score clock), PianoRollModel, StepPattern, ScoreBlocks, PFields
+  Editor/                      CsoundAnalyzer, ScrubController, CompletionProvider, OpcodeIndex, renderers, Csound.xshd
+  Controls/                    LevelMeter, Oscilloscope, SpectrumView, TableView, Sparkline, RangeIndicator, PianoKeyboard
+  ViewModels/                  MainViewModel (+ .Audio, .Live, .Midi, .LiveCoding), DocumentViewModel, ChannelControlViewModel, AppSettings
+  Views/                       MainWindow, ConfirmSaveDialog, InfoDialog
+  Styles/Theme.axaml           Theme, icons, style classes, tooltips
+  Assets/                      Demo.csd, app.ico, app.png
+docs/                          en/, es/, diagrams/, html/ (generated)
+tools/                         build_docs.py (HTML docs), make_icon.py (app icon)</code></pre>
+<h2 id="layers-and-responsibilities">Layers and responsibilities</h2>
+<ul><li><strong>Interop</strong> binds the native library. <code>CsoundLocator</code> finds the installation (<code>CSOUND_VISUAL_HOME</code>, an <code>@Source\Csound7</code> folder above the executable, or <code>%ProgramFiles%\Csound7</code>). <code>CsoundNative</code> declares the API subset in use: core, host audio/MIDI I/O and the debugger. <code>CsoundCatalog</code> uses short-lived instances to list opcodes and Csound's audio modules/devices.</li><li><strong>Audio</strong> is the app's own low-latency output. See <a href="audio-engine.html">Audio engine &amp; latency</a>.</li><li><strong>Engine</strong> owns a performance: one <code>CSOUND*</code> per run on a dedicated thread. It also holds the live-value monitor (debugger callback), the live recorder and the MIDI bridge.</li><li><strong>Midi</strong> collects MIDI from ports and the on-screen keyboard in a protocol-neutral, high-resolution message type, and feeds Csound, the UI and MIDI learn.</li><li><strong>Editor</strong> is the code-intelligence layer (analysis, hover/drag, completion, highlighting).</li><li><strong>ViewModels</strong> hold the state and commands and never reference Avalonia controls; the window provides pickers, dialogs and caret movement through delegates and events.</li></ul>
+<h2 id="the-performance-thread">The performance thread</h2>
+<ol><li>Optionally open the WASAPI device (its rate becomes <code>--sample-rate</code>) and register the thread with MMCSS <em>Pro Audio</em>.</li><li><code>csoundCreate</code> → message callback → <code>csoundSetHostAudioIO</code> / <code>csoundSetHostMIDIIO</code> with the MIDI read callback → <code>csoundSetOption</code> → <code>csoundCompileCSD</code> (text) → debugger + live callback → <code>csoundStart</code>.</li><li>Loop. Each control cycle runs <code>Step()</code>: apply UI requests (channels, events, timed tool events whose p2 is computed here from their absolute score time, live recompiles), <code>csoundPerformKsmps</code>, meters and scope, recorder, score time, tables. With the app's output the loop is driven by the device event and measures DSP load and dropouts.</li><li>Fade out, detach the debugger, <code>csoundDestroy</code>, raise <code>Finished</code>.</li></ol>
+<p>The UI never calls Csound. It enqueues requests into concurrent collections and reads snapshots every frame: meters, scope, messages, immutable live-value dictionaries and the MIDI queue.</p>
+<p><figure class="diagram" role="img" aria-label="Audio paths"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .alt { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; }
+    .t { fill: var(--text, #a8ccff); }
+    .h { fill: var(--accent-hi, #5aa0ff); font-weight: 600; }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.8; fill: none; marker-end: url(#ar); }
+    .b { stroke: var(--dim, #5a7bb8); stroke-width: 1.6; fill: none; marker-end: url(#ar2); stroke-dasharray: 6 4; }
+  </style>
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker>
+    <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5a7bb8"/></marker>
+  </defs>
+
+  <text class="h" x="30" y="30">A · App-driven WASAPI (default)</text>
+  <rect class="box" x="30" y="45" width="150" height="70" rx="10"/>
+  <text class="t" x="45" y="75">Csound</text><text class="d" x="45" y="97">PerformKsmps → spout</text>
+  <rect class="box" x="220" y="45" width="150" height="70" rx="10"/>
+  <text class="t" x="235" y="75">FIFO + mapping</text><text class="d" x="235" y="97">channels · 0dbfs → ±1</text>
+  <rect class="box" x="410" y="45" width="160" height="70" rx="10"/>
+  <text class="t" x="425" y="75">Format conversion</text><text class="d" x="425" y="97">float32 · int16/24/32</text>
+  <rect class="box" x="610" y="45" width="260" height="70" rx="10"/>
+  <text class="t" x="625" y="75">WASAPI shared / exclusive</text><text class="d" x="625" y="97">IAudioClient3 · event-driven · MMCSS</text>
+  <path class="a" d="M180 80 H218"/><path class="a" d="M370 80 H408"/><path class="a" d="M570 80 H608"/>
+  <path class="a" d="M740 115 V140 H105 V117"/>
+  <text class="d" x="300" y="160">device event: "give me N frames" → compute ⌈N / ksmps⌉ control cycles</text>
+
+  <text class="h" x="30" y="215">B · Csound-driven (PortAudio → ASIO, MME, WDM-KS)</text>
+  <rect class="alt" x="30" y="230" width="150" height="70" rx="10"/>
+  <text class="t" x="45" y="260">Csound</text><text class="d" x="45" y="282">PerformKsmps</text>
+  <rect class="alt" x="220" y="230" width="230" height="70" rx="10"/>
+  <text class="t" x="235" y="260">rtpa module (PortAudio)</text><text class="d" x="235" y="282">-+rtaudio=pa_cb · -b / -B buffers</text>
+  <rect class="alt" x="490" y="230" width="380" height="70" rx="10"/>
+  <text class="t" x="505" y="260">ASIO driver (e.g. Yamaha Steinberg USB ASIO)</text><text class="d" x="505" y="282">blocks PerformKsmps until the device has room</text>
+  <path class="b" d="M180 265 H218"/><path class="b" d="M450 265 H488"/>
+
+  <text class="d" x="30" y="345">Offline render (WAV): Csound writes the file itself, no device involved.</text>
+  <text class="d" x="30" y="368">Both paths share CsoundEngine.Step(): UI requests → csoundPerformKsmps → meters/scope → score time → tables.</text>
+</svg>
+<figcaption>Audio paths</figcaption></figure></p>
+<h2 id="music-tools">Music tools</h2>
+<p>The piano roll and the step sequencer (<code>Music/</code>, <code>Views/PianoRollWindow.cs</code>, <code>Views/StepSequencerWindow.cs</code>) share a <code>TransportScheduler</code> thread that reads Csound's score time and queues notes 120 ms ahead through <code>CsoundEngine.SendEventAt</code>; the performance thread converts each absolute time into the <code>i</code> statement's p2 just before the control cycle. Patterns reach the scheduler as immutable snapshots. See <a href="music-tools.html">Music tools</a>.</p>
+<h2 id="paint-rooms">Paint Rooms</h2>
+<p><code>Paint/</code> holds the foundation shared by the Paint Rooms tabs (<code>Views/PaintRoomsWindow.cs</code>; one class per room implementing <code>IPaintRoom</code>): <code>SpectralImage</code> (time columns × pitch rows, two float layers L/R, column-major), <code>PitchAxis</code>/<code>ScalaScale</code>, <code>PaintSession</code> (image, bounded undo history, synthesis settings, clipboards; kept in <code>MainViewModel.PaintSession</code>), <code>BrushEngine</code>, <code>ImageOps</code> (operation registry), <code>ImageCodec</code> (SkiaSharp), <code>Stft</code>, <code>WavIO</code>. Sound: <code>PaintTables</code> converts the image into Csound table data and <code>PaintCsoundCode</code> writes the instrument (<code>instr 9301</code>: per control period it slices the current columns out of the image tables with <code>ftslice</code>, smooths them with array arithmetic and drives <code>adsynt2</code> oscillator banks). <code>PaintLivePlayer</code> plays through the app's engine with <code>CsoundEngine.InvokeOnCsoundThread</code> — a pipeline of short actions, one per control cycle, that compiles the code, creates a fresh table set, copies the data straight into table memory (<code>csoundGetTable</code>) and starts a held note with a fractional instrument number; edits are re-uploaded column by column. When Csound is stopped <code>MainViewModel</code> (as <code>IPaintEngineHost</code>) starts a small host orchestra that already contains the instrument. <code>PaintRenderer</code> writes a standalone <code>.csd</code> with its tables as data files (GEN01/GEN23) and renders it on a private engine instance. See <a href="paint-rooms.html">Paint Rooms</a>.</p>
+<p><strong>Selections</strong> (<code>Paint/SelectionMask.cs</code>): <code>PaintSession.Selection</code> is an immutable <code>SelectionMask</code> — a bounding <code>CellRect</code> plus a per-cell coverage 0…1 (null array = plain rectangle). Ellipse, lasso (polygon, non-zero winding) and spline (centripetal Catmull-Rom sampled into a polygon) are rasterised with exact horizontal and 4× vertical coverage; masks combine (add = max, subtract = a·(1−b)), feather (3-pass box blur) and trace their 0.5 contour for the marching ants. Everything that uses the selection works on <code>Region</code> (= the bounds) and blends the result by the coverage (<code>PaintSession.Apply</code>, copy/paste/move, <code>BrushEngine.Gradient</code>, <code>SpectralMask.BuildGains</code> solo, the Spectrum Room's additive solo and freeze), so <code>ImageOps</code> implementations stay shape-agnostic. The canvas (<code>PaintCanvas</code>) owns the four selection tools; <code>PaintSelectionUi</code> builds their shared palette entries and options. Players cancel a stopped play by number (<code>stoppedGeneration</code>), so a Play→Stop during the staged upload never leaves a held note.</p>
+<p><strong>Image Filter</strong> (<code>Views/ImageFilterRoom.cs</code>, <code>Paint/ImageFilter*.cs</code>): the room keeps its own <code>PaintSession</code> (own canvas/undo/axis) per shared session. <code>ImageFilterTables</code> maps the picture's rows onto FFT bins (max over covered rows / interpolation between rows) and stores one gain per bin and column; <code>instr 9351</code> (tables 33500…) slices the current column per control period, blends and smooths it with array arithmetic and applies it with <code>pvsanal</code> → <code>pvsmaska</code> → <code>pvsynth</code> per channel (source: <code>diskin2</code> on a stereo temp copy of the WAV, or <code>inch 1/2</code>). Latency N + 2·hop is compensated in renders and on the dry path. <code>ImageFilterPlayer</code> reuses the staged-upload pattern of <code>PaintLivePlayer</code> on the same «Paint Rooms host».</p>
+<p><strong>Spectrum Room</strong> (<code>Views/SpectrumRoom.cs</code>): also a private <code>PaintSession</code>; each analysed picture is linked to its <code>SpectrumAnalysis</code> (sound, settings, untouched original) through a <code>ConditionalWeakTable</code>, so undo across re-analyses stays consistent. <code>SpectralAnalysis</code> runs a streaming STFT (no frame storage) in parallel blocks of columns, places each bin's power on the rows around its phase-vocoder true frequency (edge rows collect what lies beyond the axis) and stores dB levels. <code>SpectralMask</code> turns edited ÷ original into per-cell gains and applies them by STFT → gain → ISTFT (WOLA, exact identity when unedited; all-unity frames skip the FFT). Preview: the mask result is rendered in C# to a temporary stereo WAV and played by <code>SoundPreviewPlayer</code> (<code>instr 9311</code>, <code>diskin2</code>, compiled into the running performance; same host-orchestra pattern as <code>PaintLivePlayer</code>). The additive path converts levels to Paint Synth levels and uses <code>PaintLivePlayer</code>/<code>PaintRenderer</code>. Non-WAV files are decoded by <code>SoundFileLoader</code> with two <code>csound.exe</code> runs (info, then <code>diskin2</code> at the file's own rate).</p>
+<p><strong>Noise layer and 16-bit pictures</strong>: <code>SpectralImage.Noise</code> is an optional third float layer (per-cell noisiness 0 = tone … 1 = noise band, <code>null</code> until used) carried by <code>ImageHistory</code> region entries, the <code>PaintSession</code> snapshot / mask blend / clipboard / move, <code>ImageOps</code> geometry operations, the brushes (<code>BrushSettings.Noise</code> / <code>NoiseOnly</code>) and <code>Retuned</code>. In the Sines mode a noisy picture sets <code>PaintTables.Mixed</code>: instr 9301 gets p14 = 1 and table 13 of its set (noisiness, <code>(W+1)·H</code>); each row's amplitude a is split equal-power into a·√(1−n) (tone) and a·√n (noise band) and the tone rides on the noise bands' sine bank, so the mix costs what Noise bands costs. <code>ImageCodec</code> decodes 16-bit PNG/TIFF through WIC as straight <code>Rgba16</code> without colour management and maps it with a float separable resampler (<code>FromPixels</code>, also used for the RGB / RGBA mappings: blue = noise, alpha = level mask); <code>WritePng16</code> is a minimal 16-bit RGBA PNG writer used by the export.</p>
+<p><strong>Image Sequencer</strong> (<code>Views/ImageSequencerRoom.cs</code>, <code>Paint/ImageSequencer.cs</code>, <code>Controls/SequencerTimeline.cs</code>): patterns are small <code>SpectralImage</code>s (one column per step), each in its own <code>PaintSession</code> (own undo); clips (<code>SeqClip</code> records: pattern, lane, start step, repeats, transpose, reverse, invert, gain) are arranged on lanes × bars. <code>SequencerComposer.Compose</code> stamps the clips into one canvas of steps × 8 columns (gate written as lit columns per step) whose duration is the arrangement's length, played by the room's own <code>PaintLivePlayer</code> (slot 1: its own table ring 31640… and instance range 9301.5001…, so it can sound with Paint Synth's player in the same performance; <code>HostInUseByOthers</code> keeps either from stopping the shared host). Edits while playing are diffed column by column (<code>CopyChanged</code>) and uploaded like brush strokes. The document persists in <code>PaintRoomSettings.Sequencer</code> (levels as base64 16-bit).</p>
+<h2 id="midi">MIDI</h2>
+<p><figure class="diagram" role="img" aria-label="MIDI flow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .fut { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#mm); }
+  </style>
+  <defs><marker id="mm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="200" height="60" rx="10"/><text class="t" x="35" y="57">WinMM input (MIDI 1.0)</text><text class="d" x="35" y="77">Impact LX61+, UR22mkII…</text>
+  <rect class="box" x="20" y="110" width="200" height="60" rx="10"/><text class="t" x="35" y="137">Windows MIDI Services</text><text class="d" x="35" y="157">MIDI 2.0 · UMP · 16/32-bit</text>
+  <rect class="box" x="20" y="190" width="200" height="60" rx="10"/><text class="t" x="35" y="217">On-screen keyboard</text><text class="d" x="35" y="237">mouse · PC keys</text>
+
+  <rect class="box" x="290" y="100" width="210" height="90" rx="12"/>
+  <text class="t" x="305" y="128">MidiHub</text>
+  <text class="d" x="305" y="150">MidiMessage: 0…1 values</text>
+  <text class="d" x="305" y="168">16-bit vel · 32-bit CC ready</text>
+
+  <rect class="box" x="580" y="20" width="300" height="60" rx="10"/><text class="t" x="595" y="47">Csound (host MIDI I/O)</text><text class="d" x="595" y="67">read callback each k-cycle · massign · notnum</text>
+  <rect class="box" x="580" y="100" width="300" height="60" rx="10"/><text class="t" x="595" y="127">MIDI learn → sliders</text><text class="d" x="595" y="147">"channel:cc" → control channel (lin/exp)</text>
+  <rect class="box" x="580" y="180" width="300" height="60" rx="10"/><text class="t" x="595" y="207">MIDI monitor + key highlight</text><text class="d" x="595" y="227">drained by the UI every frame</text>
+
+  <path class="a" d="M220 60 C255 60 255 130 288 130"/>
+  <path class="a" d="M220 140 H288"/>
+  <path class="a" d="M220 220 C255 220 255 160 288 160"/>
+  <path class="a" d="M500 120 C540 120 540 50 578 50"/>
+  <path class="a" d="M500 145 H578"/>
+  <path class="a" d="M500 170 C540 170 540 210 578 210"/>
+
+  <text class="d" x="20" y="300">Whole messages are queued (never bytes), so the driver thread and the UI can produce at the same time safely.</text>
+  <text class="d" x="20" y="322">Csound receives MIDI 1.0 bytes; high-resolution values stay available to the app (mappings use the full 0…1 value).</text>
+</svg>
+<figcaption>MIDI flow</figcaption></figure></p>
+<p><code>WinMmMidiInput</code> (MIDI 1.0) feeds <code>MidiHub</code>. A Windows MIDI Services (MIDI 2.0 / UMP) backend can feed it too: <code>MidiMessage.FromUmp</code> already decodes MIDI 2.0 channel-voice packets with 16-bit velocity and 32-bit controllers. Csound receives MIDI 1.0 bytes pulled by its read callback each control cycle; MIDI learn mappings use the full-resolution value.</p>
+<h2 id="live-values">Live values</h2>
+<p><code>LiveValueMonitor</code> registers <code>csoundSetDebugCallback</code>. About 30 times per second it walks the active instances (<code>csoundDebugGetInstrInstances</code>), reads numeric and audio variables (<code>csoundDebugGetVariables</code>, <code>csoundDebugGetGlobalVariables</code>) and publishes an immutable dictionary keyed by (instrument number, variable name) with value, min/max, polyphony and a history ring. Named instruments are resolved with <code>csoundGetInstrNumber</code>.</p>
+<h2 id="live-coding">Live coding</h2>
+<p><figure class="diagram" role="img" aria-label="Hover help and drag-to-change"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#m); }
+  </style>
+  <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="160" height="60" rx="10"/><text class="t" x="35" y="58">Mouse over token</text><text class="d" x="35" y="78">350 ms rest</text>
+  <rect class="box" x="220" y="30" width="200" height="60" rx="10"/><text class="t" x="235" y="58">CsoundAnalyzer.Inspect</text><text class="d" x="235" y="78">kind · definition · range</text>
+  <rect class="box" x="460" y="30" width="180" height="60" rx="10"/><text class="t" x="475" y="58">Hover card</text><text class="d" x="475" y="78">help · range bar · value</text>
+  <path class="a" d="M180 60 H218"/><path class="a" d="M420 60 H458"/>
+
+  <rect class="box" x="20" y="150" width="160" height="60" rx="10"/><text class="t" x="35" y="178">Press + drag</text><text class="d" x="35" y="198">→ ↑ up · ← ↓ down</text>
+  <rect class="box" x="220" y="120" width="200" height="56" rx="10"/><text class="t" x="235" y="146">Channel token</text><text class="d" x="235" y="164">kcut chnget "cutoff"</text>
+  <rect class="box" x="220" y="190" width="200" height="56" rx="10"/><text class="t" x="235" y="216">Numeric literal</text><text class="d" x="235" y="234">0.25 in instr Voice</text>
+  <rect class="box" x="460" y="120" width="200" height="56" rx="10"/><text class="t" x="475" y="146">Slider + engine</text><text class="d" x="475" y="164">SetControl every cycle</text>
+  <rect class="box" x="460" y="190" width="200" height="56" rx="10"/><text class="t" x="475" y="216">Rewrite text</text><text class="d" x="475" y="234">one undo group</text>
+  <rect class="box" x="700" y="190" width="180" height="56" rx="10"/><text class="t" x="715" y="216">CompileOrc(instr)</text><text class="d" x="715" y="234">throttled 120 ms</text>
+  <path class="a" d="M180 172 H218"/><path class="a" d="M180 190 L218 214"/>
+  <path class="a" d="M420 148 H458"/><path class="a" d="M420 218 H458"/><path class="a" d="M660 218 H698"/>
+
+  <rect class="box" x="20" y="270" width="860" height="44" rx="10"/>
+  <text class="t" x="35" y="297">Esc while dragging → channel restored / undo group reverted (and recompiled) → value before the drag</text>
+</svg>
+<figcaption>Hover help and drag-to-change</figcaption></figure></p>
+<table><thead><tr><th>Gesture</th><th>Effect</th><th>Implementation</th></tr></thead><tbody><tr><td>Move a slider</td><td>Channel value changes</td><td><code>ChannelControlViewModel</code> → <code>CsoundEngine.SetControl</code></td></tr><tr><td>Drag a channel variable / channel name</td><td>Same channel; slider follows</td><td><code>ScrubController</code> → <code>IScrubHost.SetChannelValue</code></td></tr><tr><td>Drag a literal inside an <code>instr</code></td><td>Literal rewritten, instrument recompiled</td><td><code>LiteralScrubbed</code> → throttled <code>CompileOrc(block)</code></td></tr><tr><td>Ctrl+Enter</td><td>Selection or instrument recompiled</td><td><code>MainViewModel.EvaluateCode</code> → <code>CompileOrc</code></td></tr><tr><td>Ctrl+Shift+Enter</td><td>Score lines sent as events</td><td><code>SendScoreLines</code> → <code>SendEvent</code></td></tr></tbody></table>
+<h2 id="code-analysis">Code analysis</h2>
+<p><code>CsoundAnalyzer</code> is heuristic and line-oriented. It splits sections and blocks, parses statements (classic syntax, assignments, opcode-only lines) and classifies the token under the mouse: variable, number, p-field, header constant, channel name or opcode. It uses the real opcode list (<code>OpcodeIndex</code>) to tell variables from opcodes, and infers ranges from definitions (channel reads, literals, <code>random</code>, <code>limit</code>, breakpoint generators, envelopes, oscillator amplitude, triggers, smoothing chains). Known limits: macros, <code>#include</code> and multi-line statements are only partially understood.</p>
+<h2 id="build">Build</h2>
+<pre><code class="lang-">dotnet build src/CsoundVisual.slnx
+dotnet run --project src/CsoundVisual/CsoundVisual.csproj
+python tools/build_docs.py        # regenerates docs/html</code></pre>
+  </main>
+</div>
+</body>
+</html>

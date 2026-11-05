@@ -1,0 +1,8 @@
+# Steinberg VST3 SDK (cloned by tools/build_vst.ps1)
+external/
+# CMake build trees
+build/
+build-*/
+out/
+# Built bundle copies
+dist/

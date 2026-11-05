@@ -1,0 +1,121 @@
+{
+ "pieces": [
+  {
+   "file": "AudioFX/01_time_microscope.csd",
+   "title": "The time microscope",
+   "titleEs": "El microscopio del tiempo",
+   "description": "A spoken sentence stretched up to 20x, frozen and reversed without changing its pitch, then transposed without changing its length, and finally turned into a choir. The phase vocoder (mincer) makes speed and pitch independent.",
+   "descriptionEs": "Una frase hablada estirada hasta 20 veces, congelada e invertida sin cambiar su altura, luego transportada sin cambiar su duración y al final convertida en coro. El vocoder de fase (mincer) separa la velocidad de la afinación.",
+   "midi": false,
+   "live": false
+  },
+  {
+   "file": "AudioFX/02_beat_slicer.csd",
+   "title": "Beat slicer",
+   "titleEs": "Rebanador de ritmos",
+   "description": "A drum loop cut into 16 slices and re-sequenced live: shuffled, reversed and stuttered hits, snare rolls, and tempo changes that leave the drums' pitch untouched.",
+   "descriptionEs": "Un loop de batería cortado en 16 rebanadas y resecuenciado en vivo: golpes barajados, al revés y tartamudeados, redobles de caja y cambios de tempo que no alteran la afinación de la batería.",
+   "midi": false,
+   "live": false
+  },
+  {
+   "file": "AudioFX/03_spectral_freeze_pads.csd",
+   "title": "Frozen voice pads",
+   "titleEs": "Pads de voz congelada",
+   "description": "Two seconds of a singer become an endless ambient choir: single FFT frames are frozen, retuned to a chord progression with their formants kept, blurred and slowly morphed into each other.",
+   "descriptionEs": "Dos segundos de una cantante se convierten en un coro ambiental infinito: se congelan instantes del espectro, se reafinan a una progresión de acordes conservando los formantes y se funden lentamente unos en otros.",
+   "midi": false,
+   "live": false
+  },
+  {
+   "file": "AudioFX/04_talking_chords.csd",
+   "title": "Talking chords",
+   "titleEs": "Acordes que hablan",
+   "description": "An FFT vocoder (pvsvoc) imprints Max Mathews' speaking voice on a string-synth chord progression, from lush talking chords to a monotone 1970s robot.",
+   "descriptionEs": "Un vocoder FFT (pvsvoc) imprime la voz hablada de Max Mathews sobre una progresión de acordes de sintetizador de cuerdas, desde acordes que hablan hasta el robot monótono de los años 70.",
+   "midi": false,
+   "live": false
+  },
+  {
+   "file": "AudioFX/05_convolution_spaces.csd",
+   "title": "Convolution spaces",
+   "titleEs": "Espacios por convolución",
+   "description": "A voice and a flute travel through a measured room, a computed hall and cathedral, and an impossible space: the inside of a marimba, used as an impulse response.",
+   "descriptionEs": "Una voz y una flauta recorren una sala real medida, un auditorio y una catedral calculados, y un espacio imposible: el interior de una marimba usada como respuesta al impulso.",
+   "midi": false,
+   "live": false
+  },
+  {
+   "file": "AudioFX/06_one_voice_choir.csd",
+   "title": "One-voice choir",
+   "titleEs": "Coro de una sola voz",
+   "description": "One singer becomes a choir: formant-preserving pitch-shifted copies, each with its own drift, delay and stereo position, in octaves, fifths and thirds.",
+   "descriptionEs": "Una cantante se convierte en un coro: copias transportadas que conservan los formantes, cada una con su propia desafinación, retardo y posición estéreo, en octavas, quintas y terceras.",
+   "midi": false,
+   "live": false
+  },
+  {
+   "file": "AudioFX/07_flute_sampler.csd",
+   "title": "Build your own sampler",
+   "titleEs": "Construye tu propio sampler",
+   "description": "A playable MIDI sampler made from one 2.6 s flute note: transposition, crossfaded sustain loop, ADSR, delayed vibrato and velocity-controlled brightness. A demo melody plays by itself.",
+   "descriptionEs": "Un sampler MIDI tocable hecho con una sola nota de flauta de 2,6 s: transposición, loop de sostenido con fundido, ADSR, vibrato retardado y brillo según la velocidad. Una melodía de demostración suena sola.",
+   "midi": true,
+   "live": false
+  },
+  {
+   "file": "AudioFX/08_granular_rebuild.csd",
+   "title": "Granular Rebuild",
+   "titleEs": "Reconstrucción granular",
+   "description": "A sung phrase and a marimba line are torn into thousands of tiny grains and rebuilt: from the recognisable original to slow motion, a frozen shimmering cloud, backwards grains and back again. partikkel does the granulation and the sliders let you scrub, thicken and scatter the grains yourself.",
+   "descriptionEs": "Una frase cantada y una línea de marimba se deshacen en miles de granos diminutos y se vuelven a armar: del original reconocible a la cámara lenta, una nube congelada y brillante, granos al revés y de vuelta al principio. Los granos los hace partikkel, y con los deslizadores puedes recorrer el sonido, espesarlo y dispersar los granos tú mismo.",
+   "midi": false,
+   "live": false
+  },
+  {
+   "file": "AudioFX/Live/L0_input_check.csd",
+   "title": "Input check: auto-wah, delay and reverb (live)",
+   "titleEs": "Prueba de entrada: auto-wah, delay y reverb (en vivo)",
+   "description": "The first piece to try with a microphone or audio interface: your input through a filter that opens the louder you play, a ping-pong delay and a reverb, with the input level printed in the console every second. In the app choose Settings › Audio › Input and use headphones; it also works in the Csound Visual FX plugin in Cubase.",
+   "descriptionEs": "La primera pieza para probar un micrófono o una interfaz de audio: tu entrada pasa por un filtro que se abre cuanto más fuerte tocas, un delay ping-pong y una reverb, y la consola muestra el nivel de entrada cada segundo. En la app elige Configuración › Audio › Entrada y usa audífonos; también funciona en el plugin Csound Visual FX en Cubase.",
+   "midi": false,
+   "live": true
+  },
+  {
+   "file": "AudioFX/Live/L1_freeze_pedal.csd",
+   "title": "Spectral freeze pedal (live)",
+   "titleEs": "Pedal de congelación espectral (en vivo)",
+   "description": "Holds any instant of the incoming audio as an endless pad, re-grabbed every bar in tempo, with octave shimmer. For the Csound Visual FX plugin in Cubase: put it on an audio track and use Send to DAW.",
+   "descriptionEs": "Mantiene cualquier instante del audio entrante como un pad infinito, que se vuelve a capturar en cada compás a tempo, con brillo de octava. Para el plugin Csound Visual FX en Cubase: ponlo en una pista de audio y usa Enviar a DAW.",
+   "midi": false,
+   "live": true
+  },
+  {
+   "file": "AudioFX/Live/L2_granular_cloud_delay.csd",
+   "title": "Granular cloud delay (live)",
+   "titleEs": "Delay de nube granular (en vivo)",
+   "description": "Scatters the last 4 seconds of the track into a cloud of tiny grains with random pitch, direction and position, with feedback for rising shimmer. For the Csound Visual FX plugin in Cubase: put it on an audio track and use Send to DAW.",
+   "descriptionEs": "Esparce los últimos 4 segundos de la pista en una nube de granos diminutos con altura, dirección y posición aleatorias, con realimentación para un brillo ascendente. Para el plugin Csound Visual FX en Cubase: ponlo en una pista de audio y usa Enviar a DAW.",
+   "midi": false,
+   "live": true
+  },
+  {
+   "file": "AudioFX/Live/L3_beat_repeater.csd",
+   "title": "Beat repeater (live)",
+   "titleEs": "Repetidor de beats (en vivo)",
+   "description": "Tempo-synced stutters: on random beats it loops the last 1/4 to 1/32 note, with tape-stop pitch drops and reversed slices, locked to the host tempo. For the Csound Visual FX plugin in Cubase: put it on an audio track and use Send to DAW.",
+   "descriptionEs": "Tartamudeos sincronizados al tempo: en beats al azar repite la última negra a fusa, con caídas de cinta y rebanadas al revés, fijos al tempo del host. Para el plugin Csound Visual FX en Cubase: ponlo en una pista de audio y usa Enviar a DAW.",
+   "midi": false,
+   "live": true
+  },
+  {
+   "file": "AudioFX/Live/L4_harmonizer_choir.csd",
+   "title": "Harmonizer / choir (live)",
+   "titleEs": "Armonizador / coro (en vivo)",
+   "description": "Turns one vocal or instrument track into a section: five formant-preserving pitch-shifted copies with drift, timing spread and stereo width. For the Csound Visual FX plugin in Cubase: put it on an audio track and use Send to DAW.",
+   "descriptionEs": "Convierte una pista de voz o instrumento en una sección: cinco copias transportadas que conservan los formantes, con desafinación, dispersión temporal y amplitud estéreo. Para el plugin Csound Visual FX en Cubase: ponlo en una pista de audio y usa Enviar a DAW.",
+   "midi": false,
+   "live": true
+  }
+ ]
+}

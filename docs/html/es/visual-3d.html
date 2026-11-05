@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vistas 3D · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="" href="../en/visual-3d.html">English</a><a class="on" href="../es/visual-3d.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Resumen</a><a class="" href="guia-de-usuario.html">Guía de usuario</a><a class="" href="motor-de-audio.html">Motor de audio y latencia</a><a class="" href="inteligencia-del-editor.html">Ayuda al pasar el mouse y valores en vivo</a><a class="" href="midi.html">MIDI 2.0 y clásico</a><a class="on" href="visual-3d.html">Vistas 3D</a><a class="" href="herramientas-musicales.html">Piano roll y secuenciador</a><a class="" href="salas-de-pintura.html">Paint Rooms (pintar sonido)</a><a class="" href="vst3-cubase.html">Csound en Cubase (VST3)</a><a class="" href="host-vst3.html">Plugins VST3 en la app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Instrumentos Cabbage</a><a class="" href="arquitectura.html">Arquitectura</a><a class="" href="hoja-de-ruta.html">Hoja de ruta</a></nav></aside>
+  <main class="content">
+<h1 id="vistas-3d-opengl">Vistas 3D (OpenGL)</h1>
+<p>Se abren con <strong>3D</strong> en la barra (Ctrl+3). La ventana es independiente: llévala a un segundo monitor o proyector y presiona <strong>F11</strong> para pantalla completa (F11 o Esc para volver).</p>
+<p><figure class="diagram" role="img" aria-label="Pipeline 3D"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#gm); }
+  </style>
+  <defs><marker id="gm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="170" height="64" rx="10"/><text class="t" x="35" y="57">CsoundEngine</text><text class="d" x="35" y="77">scope ring · sr</text>
+  <rect class="box" x="220" y="30" width="170" height="64" rx="10"/><text class="t" x="235" y="57">AudioFeed</text><text class="d" x="235" y="77">30 Hz copy (UI timer)</text>
+  <rect class="box" x="420" y="20" width="200" height="84" rx="10"/><text class="t" x="435" y="47">IScene3D</text><text class="d" x="435" y="67">Waterfall · XYZ pad</text><text class="d" x="435" y="85">Spatial (binaural)</text>
+  <rect class="box" x="650" y="20" width="230" height="84" rx="10"/><text class="t" x="665" y="47">GlRenderer</text><text class="d" x="665" y="67">lines · triangles · points</text><text class="d" x="665" y="85">1 shader · dynamic VBO</text>
+
+  <rect class="box" x="420" y="160" width="200" height="70" rx="10"/><text class="t" x="435" y="188">GlView</text><text class="d" x="435" y="208">OpenGlControlBase · camera</text>
+  <rect class="box" x="650" y="160" width="230" height="70" rx="10"/><text class="t" x="665" y="188">OpenGL ES 3 (ANGLE)</text><text class="d" x="665" y="208">Direct3D 11 · GPU</text>
+  <rect class="box" x="20" y="160" width="370" height="70" rx="10"/><text class="t" x="35" y="188">Mouse → scene → channels</text><text class="d" x="35" y="208">XYZ → SetChannelNormalized · az/el/dist → SendChannel</text>
+
+  <path class="a" d="M190 62 H218"/><path class="a" d="M390 62 H418"/><path class="a" d="M620 62 H648"/>
+  <path class="a" d="M520 104 V158"/><path class="a" d="M620 195 H648"/><path class="a" d="M420 195 H392"/>
+  <text class="d" x="20" y="275">If context creation, shaders or the context itself fail, GlView raises Failed and the window shows an explanation instead of crashing.</text>
+</svg>
+<figcaption>Pipeline 3D</figcaption></figure></p>
+<h2 id="escenas">Escenas</h2>
+<table><thead><tr><th>Escena</th><th>Qué muestra o hace</th><th>Controles</th></tr></thead><tbody><tr><td><strong>Espectrograma en cascada</strong></td><td>El espectro de la salida como un terreno: la fila de adelante es ahora y las antiguas se alejan y se desvanecen. Ejes con números: <strong>frecuencia en Hz</strong> (50 … 20k, logarítmica), <strong>nivel en dBFS</strong> (−90 … 0) y <strong>tiempo</strong> (ahora, −1 s, −2 s…). Selector <strong>Colores</strong>: Ámbar, Viridis, Magma, Inferno, Arcoíris (Turbo), Hielo, Escala de grises (se recuerda). Selectores de <strong>resolución</strong>: bandas (32–256), filas por segundo (10–60) y segundos de historia (2–20); la barra inferior muestra el análisis (FFT de 2048 muestras ≈ 43 ms, Hz por bin, filas/s reales) y los fps de la GPU.</td><td>Arrastra para girar, rueda para acercar, doble clic o «Vista inicial» para volver.</td></tr><tr><td><strong>Pad XYZ</strong></td><td>Una esfera dentro de un cubo controla <strong>tres canales a la vez</strong>. Se eligen en los selectores X/Y/Z; cada eje recorre el rango de su slider, en forma exponencial si el canal es exponencial. Las proyecciones al piso y las paredes, más una estela que se desvanece, muestran el gesto.</td><td>Arrastrar con el botón izquierdo: X (horizontal) e Y (vertical). Shift+arrastrar o rueda: Z. Botón derecho para girar, Ctrl+rueda para acercar. Los bordes del cubo muestran el nombre de cada canal con su mínimo y máximo, y la esfera sus valores actuales. «Controla: …» indica de qué documento son los sliders (el que se ve en la ventana principal); al abrir el pad o cambiar de documento la esfera se ubica donde están los sliders, sin moverlos.</td></tr><tr><td><strong>Panorámica espacial (binaural)</strong></td><td>La cabeza de quien escucha (la nariz = el frente) y una fuente de sonido que ubicas alrededor. Envía <strong>az</strong> (0° al frente, en sentido horario), <strong>el</strong> (−40°…90°) y <strong>dist</strong> a los canales con esos nombres.</td><td>Arrastra sobre el piso; Shift+arrastrar o rueda: altura. El piso muestra los grados (0° frente, 90° derecha…) y las distancias de los anillos.</td></tr></tbody></table>
+<p><strong>Abrir plantilla binaural</strong> abre <code>Binaural3D.csd</code>: una fuente de pulsos espacializada con <code>hrtfmove2</code>. Usa los datos HRTF que vienen con Csound (<code>samples\hrtf-*-left/right.dat</code>, elegidos según <code>sr</code>). La distancia baja el volumen y oscurece el sonido. Escúchalo con audífonos.</p>
+<h2 id="tecnología">Tecnología</h2>
+<ul><li><strong><code>OpenGlControlBase</code> de Avalonia</strong>: el contexto lo maneja Avalonia. En Windows es <strong>OpenGL ES 3.0 sobre ANGLE / Direct3D 11</strong>, la ruta más robusta con cualquier GPU y driver. Verificado en el PC de desarrollo: <em>OpenGL ES 3.0 · ANGLE (NVIDIA GeForce RTX 3090 Ti, Direct3D11)</em>.</li><li><strong>Silk.NET.OpenGLES 2.23</strong> carga las funciones GL desde el contexto de Avalonia (<code>GL.GetApi(GetProcAddress)</code>).</li><li><strong>GlRenderer</strong>: un shader (posición + color), un buffer de vértices dinámico, líneas, triángulos y puntos, con transparencia y prueba de profundidad. El encabezado del shader cambia entre GLSL ES 3.00 y GLSL 3.30 para GL de escritorio.</li><li><strong>GlView</strong>: cámara orbital (matrices de System.Numerics), redibujo continuo (<code>RequestNextFrameRendering</code>) y paso del mouse a la escena.</li><li><strong>LabelOverlay</strong>: los números y nombres de los ejes se dibujan con texto de Avalonia sobre la imagen de la GPU, proyectados con la misma cámara (<code>GlView.ViewProjection</code>), así quedan pegados a la geometría.</li><li><strong>Error corregido (2026-11-03)</strong>: la imagen GL se dibuja en un visual hijo de composición, así que el control no tenía contenido propio y la prueba de impacto de Avalonia lo atravesaba: el mouse no llegaba (no se podía girar ni arrastrar). <code>GlView</code> implementa ahora <code>ICustomHitTest</code>.</li><li><strong>AudioFeed</strong>: un timer de la interfaz copia 30 veces por segundo el buffer de salida del motor. El código de GPU nunca toca el hilo de audio.</li><li><strong>Robustez</strong>: si fallan la creación del contexto, la compilación de shaders o el render, o si se pierde el contexto, se avisa <code>Failed</code>. La ventana explica el problema y las vistas 2D siguen funcionando. Al cerrar la ventana principal también se cierra la 3D.</li></ul>
+<h2 id="ideas-para-después">Ideas para después</h2>
+<p>Vulkan mediante <code>GpuInterop</code> de Avalonia si OpenGL no alcanzara; osciloscopio estéreo 3D (espiral de fase L/R); superficie 3D de wavetables; visualizador para tocar en vivo guiado por canales y bandas del espectro; grafo 3D del instrumento.</p>
+<p>Código: <code>src/CsoundVisual/Visual3D/</code> (<code>GlView</code>, <code>GlRenderer</code>, <code>Scenes</code>) y <code>Views/Visual3DWindow.cs</code>.</p>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,726 @@
+<!--
+  Main window of Csound Visual.
+
+  Layout (rows): app-drawn title/tool bar · body · status bar.
+  Body (columns): editor area (tabs + code + console) · splitter · side panel (cards).
+  The editor area hosts a transparent Canvas ("Overlay") above the code where the hover card
+  of the ScrubController is drawn; it is not hit-testable, so it never steals input.
+  A last layer spans all three rows: the enlarged "watch" view, shown above everything else.
+
+  Conventions
+  · DataContext is MainViewModel (x:DataType below); bindings are compiled
+    (AvaloniaUseCompiledBindingsByDefault), so every path is checked at build time.
+  · Every visible text comes from Localization/Strings.cs through {l:T Key}: MWnnn keys are
+    numbered in the order they appear in this file, Area.Name keys were added later.
+  · Colours are DynamicResource brushes from the active theme preset (Theming/AppTheme), so a
+    preset change in the APPEARANCE card recolours the window live.
+  · Named elements (x:Name) are used by MainWindow.axaml.cs: the responsive toolbar logic
+    (Toolbar, TitleLeft, TitleRight, StatusPill, StatusLabel, the *Button names, MoreButton),
+    the side panel toggle (Body, SidePanel, SideSplitter), the editor (Editor, Overlay), the
+    meters fed at 60 fps (Scope, Spectrum, Meter, InMeter) and the input handlers (EventBox,
+    ConsoleList, Piano, WatchList, WatchDim).
+-->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CsoundVisual.ViewModels"
+        xmlns:eng="using:CsoundVisual.Engine"
+        xmlns:interop="using:CsoundVisual.Interop"
+        xmlns:ae="using:AvaloniaEdit"
+        xmlns:c="using:CsoundVisual.Controls"
+        xmlns:th="using:CsoundVisual.Theming"
+        xmlns:l="using:CsoundVisual.Localization"
+        xmlns:cab="using:CsoundVisual.Cabbage"
+        x:Class="CsoundVisual.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="{Binding WindowTitle}"
+        Width="1440" Height="900" MinWidth="620" MinHeight="420"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Assets/app.ico"
+        Background="{DynamicResource BgDeepBrush}"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="52">
+
+  <!--
+    Window attributes above: the client area is extended into the title bar (ExtendClientArea…)
+    so the app draws its own 52 px title / tool bar (row 0 below) and Windows only keeps its
+    caption buttons at the top right. Width/Height are the defaults; MainWindow.RestoreWindowBounds
+    replaces them with the saved bounds (or 85 % of the screen) when the window opens.
+  -->
+
+  <!-- Global shortcuts. Each runs a [RelayCommand] of MainViewModel; the tooltips name them.
+       Editor-only shortcuts (Ctrl+Enter, Ctrl+Space, F3) are handled in MainWindow.OnEditorKeyDown. -->
+  <Window.KeyBindings>
+    <KeyBinding Gesture="F5" Command="{Binding PlayCommand}" />
+    <KeyBinding Gesture="Shift+F5" Command="{Binding StopCommand}" />
+    <KeyBinding Gesture="Ctrl+R" Command="{Binding RenderCommand}" />
+    <KeyBinding Gesture="Ctrl+N" Command="{Binding NewCommand}" />
+    <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenCommand}" />
+    <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}" />
+    <KeyBinding Gesture="Ctrl+B" Command="{Binding ToggleSidePanelCommand}" />
+    <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding OpenSettingsCommand}" />
+    <KeyBinding Gesture="Ctrl+E" Command="{Binding OpenExamplesBrowserCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+R" Command="{Binding ToggleRecordingCommand}" />
+    <KeyBinding Gesture="Ctrl+D3" Command="{Binding Open3DCommand}" />
+    <KeyBinding Gesture="Ctrl+P" Command="{Binding OpenPianoRollCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+P" Command="{Binding OpenStepSequencerCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+V" Command="{Binding OpenPluginChainCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+I" Command="{Binding OpenPaintRoomsCommand}" />
+  </Window.KeyBindings>
+
+  <!-- Root grid: row 0 = title/tool bar (52 px, must match ExtendClientAreaTitleBarHeightHint),
+       row 1 = body, row 2 = status bar (28 px). -->
+  <Grid RowDefinitions="52,*,28">
+
+    <!-- ===== Title bar / toolbar (drag area via ElementRole on the inner grid, toolbar buttons opt out with role User) ===== -->
+    <Border x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource TitleBrush}"
+            BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1">
+      <!--
+        The drag area (ElementRole TitleBar) is this grid only: it stops 148 px before the right
+        edge so Windows' minimize / maximize / close buttons stay clickable, and 5 px below the
+        top so the window can still be resized from its top edge. Transparent background makes
+        the gaps between the toolbar buttons draggable too (and double-click maximizes/restores).
+      -->
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="14,5,148,0" Background="Transparent"
+            WindowDecorationProperties.ElementRole="TitleBar">
+
+        <!-- Column 0: logo, app name and the current document title (the texts hide at toolbar
+             level 1 and above, IsCompact, to give the buttons room). Part of the drag area. -->
+        <StackPanel x:Name="TitleLeft" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+          <Image Source="/Assets/app.png" Width="32" Height="32" RenderOptions.BitmapInterpolationMode="HighQuality" />
+          <StackPanel VerticalAlignment="Center" IsVisible="{Binding !IsCompact}">
+            <TextBlock Text="Csound Visual" FontWeight="SemiBold" FontSize="14" />
+            <TextBlock Text="{Binding SelectedDocument.Title, FallbackValue=''}" Classes="dim" FontSize="11" />
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel x:Name="Toolbar" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2"
+                    Grid.IsSharedSizeScope="True"
+                    WindowDecorationProperties.ElementRole="User">
+          <!-- Column 1: the centred toolbar. ElementRole "User" opts it out of the drag area, so its
+               buttons receive clicks.
+               Every labelled toolbar button shares one width (SharedSizeGroup "Bar" = the widest label),
+               so the toolbar never changes size or shifts when a button is clicked.
+               Responsive levels (MainWindow.ApplyResponsiveLayout, thresholds measured at run time):
+               0 = icon + label; 1 = icons only (IsCompact hides the labels); 2 = the less used
+               buttons (New, Open, Save as, Examples, Piano roll, Steps, Paint, Plug-ins, Render,
+               Send to DAW) fold into the «⋯» MoreButton; 3 = the status pill shrinks to the clock;
+               4 = status pill and 3D button hidden too. Play, Stop, Save and Record never fold. -->
+          <Button x:Name="NewButton" Classes="tool" Command="{Binding NewCommand}" ToolTip.Tip="{l:T MW001}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconNew}" />
+                <TextBlock Text="{l:T MW002}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <Button x:Name="OpenButton" Classes="tool" Command="{Binding OpenCommand}" ToolTip.Tip="{l:T MW003}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconOpen}" />
+                <TextBlock Text="{l:T MW004}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <Button Classes="tool" Command="{Binding SaveCommand}" ToolTip.Tip="{l:T MW005}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconSave}" />
+                <TextBlock Text="{l:T MW006}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <Button x:Name="SaveAsButton" Classes="tool" Command="{Binding SaveAsCommand}" ToolTip.Tip="{l:T Toolbar.SaveAsTip}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconSaveAs}" />
+                <TextBlock Text="{l:T Toolbar.SaveAs}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <Button x:Name="ExamplesButton" Classes="tool" Command="{Binding OpenExamplesBrowserCommand}" ToolTip.Tip="{l:T Examples.Tip}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconBook}" />
+                <TextBlock Text="{l:T Toolbar.Examples}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+
+          <!-- Separator between the file group and the transport / tools group. -->
+          <Border Width="1" Height="24" Margin="8,0" Background="{DynamicResource LineBrush}" />
+
+          <!-- «Tocar» starts Csound (the sound engine). Its label stays visible at every level; from
+               level 1 on, the code-behind removes it from the "Bar" group so it is not used as the
+               common width of the icon-only buttons. The bubble below appears when notes arrive
+               while it is stopped, because otherwise a lit keyboard with no sound looks like a bug. -->
+          <Button x:Name="PlayButton" Classes="tool primary" Classes.attention="{Binding PlayHintVisible}"
+                  Command="{Binding PlayCommand}" ToolTip.Tip="{l:T MW007}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconPlay}" />
+                <TextBlock Text="{l:T MW008}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <!-- The hint bubble: a Popup, so it floats over the editor; not light-dismissed, it closes
+               when PlayHintVisible turns false (Play pressed, or 5 s after the last note; see
+               MainViewModel.Midi.cs). -->
+          <Popup PlacementTarget="{Binding #PlayButton}" Placement="Bottom" VerticalOffset="8"
+                 IsOpen="{Binding PlayHintVisible}" IsLightDismissEnabled="False">
+            <Border Background="{DynamicResource Surface2Brush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5"
+                    CornerRadius="10" Padding="14,10" MaxWidth="320" BoxShadow="0 6 20 0 #90000000">
+              <StackPanel Spacing="4">
+                <TextBlock Text="{l:T MW009}" FontWeight="SemiBold"
+                           Foreground="{DynamicResource AccentHiBrush}" TextWrapping="Wrap" />
+                <TextBlock Text="{l:T MW010}"
+                           Classes="dim" FontSize="12" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+          </Popup>
+          <Button Classes="tool" Command="{Binding StopCommand}" ToolTip.Tip="{l:T MW011}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconStop}" />
+                <TextBlock Text="{l:T MW012}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <!-- The context menu lives on a transparent wrapper so right-click still works while the
+               button is disabled (a disabled control receives no pointer input). -->
+          <Panel Background="Transparent">
+            <Panel.ContextMenu>
+              <ContextMenu>
+                <MenuItem Header="{l:T MW013}" Command="{Binding OpenRecordingsFolderCommand}" />
+              </ContextMenu>
+            </Panel.ContextMenu>
+            <Button Classes="tool" Command="{Binding ToggleRecordingCommand}" Classes.primary="{Binding IsRecording}"
+                    AutomationProperties.Name="{Binding RecordText}"
+                    ToolTip.ShowOnDisabled="True"
+                    ToolTip.Tip="{l:T MW014}">
+              <StackPanel Orientation="Horizontal" Spacing="7">
+                <Ellipse Width="11" Height="11" Fill="{DynamicResource RecordBrush}" VerticalAlignment="Center" />
+                <!-- Both labels share one cell; the invisible longest one fixes the width, so the
+                     button does not grow when "Grabar" becomes "Detener grabación". -->
+                <Panel IsVisible="{Binding !IsCompact}">
+                  <TextBlock Text="{l:T MW015}" Opacity="0" />
+                  <TextBlock Text="{Binding RecordText}" HorizontalAlignment="Center" />
+                </Panel>
+              </StackPanel>
+            </Button>
+          </Panel>
+          <Button x:Name="View3DButton" Classes="tool" Command="{Binding Open3DCommand}"
+                  ToolTip.Tip="{l:T MW016}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconCube}" />
+                <TextBlock Text="3D" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <!-- Music tools (stage 4): one visible button each, the tooltip names the shortcut.
+               Piano roll = Ctrl+P, Step sequencer = Ctrl+Shift+P. -->
+          <Button x:Name="PianoButton" Classes="tool" Command="{Binding OpenPianoRollCommand}" ToolTip.Tip="{l:T Tools.PianoRollTip}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconPiano}" />
+                <TextBlock Text="{l:T Tools.PianoRoll}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <Button x:Name="StepsButton" Classes="tool" Command="{Binding OpenStepSequencerCommand}" ToolTip.Tip="{l:T Tools.SequencerTip}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconSteps}" />
+                <TextBlock Text="{l:T Tools.SequencerShort}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <!-- Paint Rooms (Ctrl+Shift+I): compose and design sound by painting images. -->
+          <Button x:Name="PaintButton" Classes="tool" Command="{Binding OpenPaintRoomsCommand}" ToolTip.Tip="{l:T Toolbar.PaintTip}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconPaint}" />
+                <TextBlock Text="{l:T Toolbar.Paint}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <!-- VST3 plug-in chain after Csound (stage 5): effects/instruments with their own windows. -->
+          <Button x:Name="PluginsButton" Classes="tool" Command="{Binding OpenPluginChainCommand}" ToolTip.Tip="{l:T Toolbar.PluginsTip}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconPlug}" />
+                <TextBlock Text="{l:T Toolbar.Plugins}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <Button x:Name="RenderButton" Classes="tool" Command="{Binding RenderCommand}" ToolTip.Tip="{l:T MW017}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconRender}" />
+                <TextBlock Text="{l:T MW018}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <!-- Send the orchestra to the «Csound Visual» VST3 plugin in Cubase; the menu lists the running instances. -->
+          <Button x:Name="DawButton" Classes="tool" ToolTip.Tip="{l:T Daw.Tip}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition SharedSizeGroup="Bar" /></Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource IconSend}" />
+                <TextBlock Text="{l:T Daw.Button}" IsVisible="{Binding !IsCompact}" />
+              </StackPanel>
+            </Grid>
+          </Button>
+          <!-- Narrow window: the less used buttons move into this «More» menu (with their shortcuts). -->
+          <Button x:Name="MoreButton" Classes="tool" IsVisible="False" ToolTip.Tip="{l:T Toolbar.MoreTip}">
+            <TextBlock Text="⋯" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="6,-4,6,0" />
+          </Button>
+        </StackPanel>
+
+        <!-- Column 2: status pill, Settings and side-panel toggle (the code-behind also inserts the
+             Ableton Link indicator at index 0 here). Opted out of the drag area like the toolbar. -->
+        <StackPanel x:Name="TitleRight" Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"
+                    WindowDecorationProperties.ElementRole="User">
+          <!-- Fixed width: the text inside changes (Listo/Sonando/Renderizando, REC clock) and a
+               growing pill would push the centred toolbar sideways. -->
+          <Border x:Name="StatusPill" Background="#33000000" CornerRadius="12" Padding="10,4" Width="270" ToolTip.Tip="{Binding StatusText}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Ellipse Classes="status" Classes.running="{Binding IsRunning}" VerticalAlignment="Center" ToolTip.Tip="{l:T MW019}" />
+              <TextBlock x:Name="StatusLabel" Text="{Binding StatusText}" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding TimeText}" FontSize="12" FontFamily="{StaticResource CodeFont}"
+                         Foreground="{DynamicResource AccentHiBrush}" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding RecordClock}" FontSize="12" FontFamily="{StaticResource CodeFont}" Foreground="{DynamicResource DangerBrush}"
+                         VerticalAlignment="Center" IsVisible="{Binding IsRecording}" ToolTip.Tip="{l:T MW020}" />
+            </StackPanel>
+          </Border>
+          <Button Classes="tool" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="{l:T Settings.Tip}">
+            <PathIcon Data="{StaticResource IconGear}" />
+          </Button>
+          <Button Classes="tool" Command="{Binding ToggleSidePanelCommand}" ToolTip.Tip="{l:T MW021}">
+            <PathIcon Data="{StaticResource IconPanel}" />
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ===== Body =====
+         Columns: editor area (*) · 6 px splitter · side panel (360 px). MainWindow.ApplySidePanel
+         sets columns 1 and 2 to 0 when the side panel is hidden (Ctrl+B or a narrow window). -->
+    <Grid x:Name="Body" Grid.Row="1" ColumnDefinitions="*,6,360" Margin="10,10,10,0">
+
+      <!-- Editor area. Rows: tabs + code (*) · 6 px splitter · console (200 px, resizable) ·
+           on-screen keyboard (Auto, collapses to nothing when hidden). -->
+      <Grid RowDefinitions="*,6,200,Auto">
+        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10" ClipToBounds="True"
+                BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
+          <Grid RowDefinitions="Auto,*">
+
+            <!-- Tabs: a horizontal ListBox bound to the open documents (selection = shown document),
+                 plus a «+» button. The close button inside each tab binds through $parent[ListBox]
+                 to reach MainViewModel, because the item template's DataContext is the document. -->
+            <Grid ColumnDefinitions="*,Auto" Background="{DynamicResource BgBrush}">
+              <ListBox x:Name="Tabs" Classes="tabs" ToolTip.Tip="{l:T MW022}" ItemsSource="{Binding Documents}" SelectedItem="{Binding SelectedDocument}"
+                       ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                <ListBox.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:DocumentViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                      <Ellipse Width="7" Height="7" Fill="{DynamicResource GoodBrush}" IsVisible="{Binding IsPlaying}" VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding Title}" VerticalAlignment="Center" FontSize="12.5" />
+                      <Button Classes="tabclose" ToolTip.Tip="{l:T MW023}"
+                              Command="{Binding $parent[ListBox].((vm:MainViewModel)DataContext).CloseDocumentCommand}"
+                              CommandParameter="{Binding}">
+                        <PathIcon Data="{StaticResource IconClose}" Width="9" Height="9" />
+                      </Button>
+                    </StackPanel>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+              <!-- Editor Undo / Redo (the shown document's own undo stack) and «+» new tab. The arrows
+                   are enabled from code-behind (UpdateEditorUndoButtons) as the undo stack changes. -->
+              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" Margin="4,0">
+                <Button x:Name="EditorUndoButton" Classes="tool" Padding="8,6" ToolTip.Tip="{l:T Editor.UndoTip}">
+                  <PathIcon Data="{StaticResource IconUndo}" Width="13" Height="13" />
+                </Button>
+                <Button x:Name="EditorRedoButton" Classes="tool" Padding="8,6" ToolTip.Tip="{l:T Editor.RedoTip}">
+                  <PathIcon Data="{StaticResource IconRedo}" Width="13" Height="13" />
+                </Button>
+                <Button Classes="tool" Padding="9,6" Command="{Binding NewCommand}" ToolTip.Tip="{l:T MW024}">
+                  <PathIcon Data="{StaticResource IconPlus}" Width="12" Height="12" />
+                </Button>
+              </StackPanel>
+            </Grid>
+
+            <!-- Code + hover card overlay. One AvaloniaEdit TextEditor for all tabs: switching tabs
+                 swaps its Document (each DocumentViewModel owns a TextDocument with its own undo
+                 history). Highlighting, renderers and key handling are set up in code-behind. -->
+            <Grid Grid.Row="1">
+              <ae:TextEditor x:Name="Editor" Document="{Binding SelectedDocument.Document}"
+                             FontSize="{Binding EditorFontSize}" WordWrap="{Binding EditorWordWrap}"
+                             ShowLineNumbers="True" Padding="6,8" />
+              <Canvas x:Name="Overlay" IsHitTestVisible="False" ClipToBounds="False" />
+            </Grid>
+          </Grid>
+        </Border>
+
+        <GridSplitter Grid.Row="1" ResizeDirection="Rows" ToolTip.Tip="{l:T MW025}" />
+
+        <!-- Console: Csound's messages (MainViewModel.ConsoleLines). Classes colour each line by
+             kind; a line that names a source line is a link (tap → MainViewModel.GoToSource).
+             Multiple selection + the context menu built in SetupConsoleCopy allow copying. -->
+        <Border Grid.Row="2" Background="{DynamicResource BgBrush}" CornerRadius="10"
+                BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
+          <Grid RowDefinitions="Auto,*">
+            <Grid ColumnDefinitions="*,Auto" Margin="14,6,6,2">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock Classes="section" Text="{l:T MW026}" VerticalAlignment="Center" ToolTip.Tip="{l:T MW027}" />
+                <TextBlock Classes="dim" FontSize="11" VerticalAlignment="Center"
+                           Text="{l:T MW028}" />
+              </StackPanel>
+              <Button Grid.Column="1" Classes="tool" Padding="6" Command="{Binding ClearConsoleCommand}" ToolTip.Tip="{l:T MW029}">
+                <PathIcon Data="{StaticResource IconClear}" Width="13" Height="13" />
+              </Button>
+            </Grid>
+            <ListBox x:Name="ConsoleList" Grid.Row="1" Classes="console" ItemsSource="{Binding ConsoleLines}" SelectionMode="Multiple">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="eng:ConsoleLine">
+                  <TextBlock Classes="line" Text="{Binding Text}" TextWrapping="Wrap"
+                             Classes.info="{Binding IsInfo}" Classes.warning="{Binding IsWarning}"
+                             Classes.error="{Binding IsError}" Classes.link="{Binding HasSourceLine}" />
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+        </Border>
+
+        <!-- On-screen keyboard (toggled from the MIDI card). Its NoteOn/NoteOff events are wired to
+             the MIDI hub in code-behind; notes from external controllers are lit in green. -->
+        <Border Grid.Row="3" Margin="0,8,0,0" Padding="8" Background="{DynamicResource BgBrush}" CornerRadius="10"
+                BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" IsVisible="{Binding IsKeyboardVisible}">
+          <Grid ColumnDefinitions="Auto,*">
+            <StackPanel Width="96" Spacing="2" VerticalAlignment="Center" Margin="2,0,10,0">
+              <TextBlock Classes="section" Text="{l:T MW030}" ToolTip.Tip="{l:T MW031}" />
+              <TextBlock Classes="dim" FontSize="10.5" TextWrapping="Wrap" Text="{l:T MW032}" />
+            </StackPanel>
+            <c:PianoKeyboard x:Name="Piano" Grid.Column="1" Height="86"
+                             ToolTip.Tip="{l:T MW033}" />
+          </Grid>
+        </Border>
+      </Grid>
+
+      <!-- Drag to resize the side panel; hidden together with it (ApplySidePanel). -->
+      <GridSplitter x:Name="SideSplitter" Grid.Column="1" ResizeDirection="Columns" ToolTip.Tip="{l:T MW034}" />
+
+      <!-- ===== Side panel =====
+           A vertical stack of "cards" in a ScrollViewer: Cabbage UI, output, live controls,
+           watch, live event, MIDI, appearance, tables, examples. -->
+      <ScrollViewer x:Name="SidePanel" Grid.Column="2" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="10" Margin="0,0,2,10">
+
+          <!-- Cabbage UI of the shown document (only visible for .csd files with a <Cabbage> section). -->
+          <cab:CabbageCard x:Name="CabbageCard" />
+
+          <!-- Output: scope + meters. While linked to the VST3 plugin («Send to DAW») the card turns
+               green, is titled «VST3 OUTPUT» and shows the plugin's audio inside the DAW. -->
+          <Border Classes="card output" Classes.vst="{Binding IsDawLinked}">
+            <StackPanel Spacing="10">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="section" Text="{Binding OutputTitle}" ToolTip.Tip="{l:T MW036}" />
+                <TextBlock Grid.Column="1" Classes="dim" FontSize="11" Text="{Binding EngineInfo}" />
+              </Grid>
+              <!-- Scope, Spectrum and Meter are not bound: MainWindow.OnFrame pushes samples and
+                   peaks into them every 16 ms (engine buffers, or the DAW plug-in's when linked). -->
+              <c:Oscilloscope x:Name="Scope" Height="120" ToolTip.Tip="{l:T MW037}" />
+              <c:SpectrumView x:Name="Spectrum" Height="90"
+                              ToolTip.Tip="{l:T MW038}" />
+              <c:LevelMeter x:Name="Meter" Height="34" ToolTip.Tip="{l:T MW039}" />
+              <!-- Live input level (only while an audio input feeds Csound; see Settings › Audio › Input). -->
+              <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding IsInputMeterVisible}" ToolTip.Tip="{l:T Audio.InMeterTip}">
+                <TextBlock Classes="dim" FontSize="10" Text="{l:T Audio.InMeter}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <c:LevelMeter x:Name="InMeter" Grid.Column="1" Height="18" />
+              </Grid>
+              <!-- DSP load (time Csound needs per audio buffer / buffer duration) and the app's RAM. -->
+              <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="3"
+                    IsVisible="{Binding IsLoadMeterVisible}" ToolTip.Tip="{l:T Audio.DspTip}">
+                <TextBlock Classes="dim" FontSize="10" Text="DSP" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <!-- Two stacked progress bars: the current load (coloured warn ≥ 70 %, danger ≥ 90 %)
+                     and, on top, a transparent "dsppeak" bar whose style draws only the recent peak tick. -->
+                <Panel Grid.Column="1" Height="8">
+                  <ProgressBar Classes="dsp" Classes.warn="{Binding DspWarn}" Classes.danger="{Binding DspDanger}"
+                               Minimum="0" Maximum="100" Value="{Binding DspPercent}" MinHeight="8" Height="8" />
+                  <ProgressBar Classes="dsppeak" Minimum="0" Maximum="100" Value="{Binding DspPeakPercent}"
+                               MinHeight="8" Height="8" Background="Transparent" IsHitTestVisible="False" />
+                </Panel>
+                <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="dim" FontSize="10.5" Text="{Binding DspText}" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="1" Classes="dim" FontSize="10.5" Text="{Binding MemoryText}" Margin="8,0,0,0" />
+                </Grid>
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <!-- Live channel sliders of the shown document: one per chnget/chnk channel found in the
+               code (re-detected 450 ms after typing stops). Each row: name, MIDI-learn button (right
+               click = forget the assignment), value, slider. Note: the slider tooltip's StringFormat
+               is a fixed Spanish text, not a {l:T} key. -->
+          <Border Classes="card">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="section" Text="{l:T MW040}" ToolTip.Tip="{l:T MW041}" />
+              <TextBlock Classes="dim" FontSize="12" TextWrapping="Wrap" IsVisible="{Binding !SelectedDocument.HasChannels, FallbackValue=True}"
+                         Text="{l:T MW042}" />
+              <ItemsControl ItemsSource="{Binding SelectedDocument.Channels}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ChannelControlViewModel">
+                    <StackPanel Margin="0,2,0,4">
+                      <Grid ColumnDefinitions="*,Auto,Auto">
+                        <TextBlock Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Classes="tool" Padding="6,1" Margin="0,0,8,0" FontSize="10.5"
+                                Classes.primary="{Binding IsLearning}" Content="{Binding LearnText}"
+                                Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).LearnMidiCommand}" CommandParameter="{Binding}"
+                                ToolTip.Tip="{l:T MW043}">
+                          <Button.ContextMenu>
+                            <ContextMenu>
+                              <MenuItem Header="{l:T MW044}" Command="{Binding ForgetMidiCommand}" />
+                            </ContextMenu>
+                          </Button.ContextMenu>
+                        </Button>
+                        <TextBlock Grid.Column="2" Text="{Binding DisplayValue}" FontFamily="{StaticResource CodeFont}"
+                                   FontSize="12" Foreground="{DynamicResource AccentHiBrush}" VerticalAlignment="Center" />
+                      </Grid>
+                      <Slider Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" Value="{Binding Value}" Margin="0,-6,0,-10" ToolTip.Tip="{Binding Name, StringFormat='Canal «{0}»: arrástralo para cambiarlo en tiempo real.'}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="dim" FontSize="11" TextWrapping="Wrap"
+                         Text="{l:T MW045}" />
+            </StackPanel>
+          </Border>
+
+          <!-- Watched variables (live values read through the Csound 7 debugger while «Live values» is
+               on). Each card shows name, scope, value, a ≈3 s sparkline and details; clicking a card
+               (not its ✕) opens the enlarged view at the end of this file (handler in code-behind). -->
+          <Border Classes="card" ToolTip.Tip="{l:T MW046}">
+            <StackPanel Spacing="8">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="section" Text="{l:T MW047}" VerticalAlignment="Center" />
+                <CheckBox Grid.Column="1" Content="{l:T MW048}" IsChecked="{Binding LiveValuesEnabled}" FontSize="12" MinHeight="0" Padding="6,0,0,0"
+                          ToolTip.Tip="{l:T MW049}" />
+              </Grid>
+              <TextBlock Classes="dim" FontSize="12" TextWrapping="Wrap" IsVisible="{Binding !HasWatches}"
+                         Text="{l:T MW050}" />
+              <ItemsControl x:Name="WatchList" ItemsSource="{Binding Watches}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:WatchItemViewModel">
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" Margin="0,2,0,6"
+                          Background="Transparent" Cursor="Hand" ToolTip.Tip="{l:T Watch.ClickToEnlarge}">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="{Binding Name}" FontFamily="{StaticResource CodeFont}" FontSize="13" Foreground="{DynamicResource AccentHiBrush}" />
+                        <TextBlock Text="{Binding Scope}" Classes="dim" FontSize="11" VerticalAlignment="Center" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{Binding ValueText}" FontFamily="{StaticResource CodeFont}" FontSize="13" Foreground="{DynamicResource GoodBrush}" VerticalAlignment="Center" />
+                        <Button Classes="tabclose" ToolTip.Tip="{l:T MW051}"
+                                Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).RemoveWatchCommand}" CommandParameter="{Binding}">
+                          <PathIcon Data="{StaticResource IconClose}" Width="8" Height="8" />
+                        </Button>
+                      </StackPanel>
+                      <c:Sparkline Grid.Row="1" Grid.ColumnSpan="2" Values="{Binding History}" Height="26" Margin="0,3,0,0"
+                                   ToolTip.Tip="{l:T MW052}" />
+                      <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding DetailText}" Classes="dim" FontSize="11" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+
+          <!-- Live score event: one score line sent to the running performance (Enter in the box is
+               handled in code-behind and runs the same SendEventCommand as the button). -->
+          <Border Classes="card">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="section" Text="{l:T MW053}" ToolTip.Tip="{l:T MW054}" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox x:Name="EventBox" Text="{Binding LiveEvent}" FontFamily="{StaticResource CodeFont}" FontSize="12" ToolTip.Tip="{l:T MW055}" />
+                <Button Grid.Column="1" Classes="tool primary" Margin="6,0,0,0" Command="{Binding SendEventCommand}" ToolTip.Tip="{l:T MW056}">
+                  <PathIcon Data="{StaticResource IconSend}" />
+                </Button>
+              </Grid>
+              <TextBlock Classes="dim" FontSize="11" TextWrapping="Wrap"
+                         Text="{l:T MW057}" />
+            </StackPanel>
+          </Border>
+
+          <!-- MIDI inputs and monitor: keyboard toggle, rescan, MIDI 2.0 availability text, one
+               checkbox per port (MIDI 2.0 and WinMM listed separately) and the last messages. -->
+          <Border Classes="card" ToolTip.Tip="{l:T MW058}">
+            <StackPanel Spacing="8">
+              <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Classes="section" Text="MIDI" VerticalAlignment="Center" />
+                <ToggleButton Grid.Column="1" Classes="tool" Padding="6,3" Margin="0,0,4,0" IsChecked="{Binding IsKeyboardVisible}"
+                              ToolTip.Tip="{l:T MW059}">
+                  <TextBlock Text="{l:T MW060}" FontSize="11.5" />
+                </ToggleButton>
+                <Button Grid.Column="2" Classes="tool" Padding="6" Command="{Binding RefreshMidiPortsCommand}"
+                        ToolTip.Tip="{l:T MW061}">
+                  <PathIcon Data="{StaticResource IconRefresh}" Width="12" Height="12" />
+                </Button>
+              </Grid>
+              <TextBlock Classes="dim" FontSize="11" TextWrapping="Wrap" Text="{Binding Midi2Info}"
+                         ToolTip.Tip="{l:T MW062}" />
+              <ItemsControl ItemsSource="{Binding MidiPorts}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:MidiPortItem">
+                    <CheckBox IsChecked="{Binding IsEnabled}" FontSize="12.5"
+                              ToolTip.Tip="{l:T Midi.PortTip}">
+                      <TextBlock Text="{Binding Port.Display}" TextTrimming="CharacterEllipsis" />
+                    </CheckBox>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Border Background="{DynamicResource BgDeepBrush}" CornerRadius="6" Padding="8,6" MaxHeight="110"
+                      ToolTip.Tip="{l:T MW063}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                  <ItemsControl ItemsSource="{Binding MidiMonitor}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="x:String">
+                        <TextBlock Text="{Binding}" FontFamily="{StaticResource CodeFont}" FontSize="11" Foreground="{DynamicResource TextDimBrush}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </Border>
+            </StackPanel>
+          </Border>
+
+          <!-- Appearance: colour preset of the whole app (applied live, remembered). Each item shows
+               the preset's colour swatches followed by its name. -->
+          <Border Classes="card" ToolTip.Tip="{l:T MW064}">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="section" Text="{l:T MW065}" />
+              <ComboBox ItemsSource="{Binding ThemePresets}" SelectedItem="{Binding SelectedThemePreset}" HorizontalAlignment="Stretch"
+                        ToolTip.Tip="{l:T MW066}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="th:ThemePreset">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <ItemsControl ItemsSource="{Binding Swatches}" VerticalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <Border Width="14" Height="14" CornerRadius="7" Background="{Binding}" BorderBrush="#40FFFFFF" BorderThickness="1" />
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                      <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+          </Border>
+
+          <!-- Function tables captured from the running Csound: pick one, see it drawn (TableView). -->
+          <Border Classes="card">
+            <StackPanel Spacing="8">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="section" Text="{l:T MW081}" VerticalAlignment="Center" ToolTip.Tip="{l:T MW082}" />
+                <Button Grid.Column="1" Classes="tool" Padding="6" Command="{Binding RefreshTablesCommand}" ToolTip.Tip="{l:T MW083}">
+                  <PathIcon Data="{StaticResource IconRefresh}" Width="13" Height="13" />
+                </Button>
+              </Grid>
+              <ComboBox ItemsSource="{Binding Tables}" SelectedItem="{Binding SelectedTable}" HorizontalAlignment="Stretch" ToolTip.Tip="{l:T MW084}"
+                        IsVisible="{Binding HasTables}" />
+              <c:TableView Table="{Binding SelectedTable}" Height="110" ToolTip.Tip="{l:T MW085}" />
+              <TextBlock Classes="dim" FontSize="11" Text="{Binding TableInfo}" IsVisible="{Binding HasTables}" />
+            </StackPanel>
+          </Border>
+
+          <!-- Examples: the bundled collection opens in its own browser window -->
+          <Border Classes="card">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="section" Text="{l:T MW086}" ToolTip.Tip="{l:T Examples.Tip}" />
+              <TextBlock Classes="dim" FontSize="12" TextWrapping="Wrap" Text="{Binding ExamplesSummary}" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="tool primary" Command="{Binding OpenExamplesBrowserCommand}" ToolTip.Tip="{l:T Examples.Tip}">
+                  <StackPanel Orientation="Horizontal" Spacing="7">
+                    <PathIcon Data="{StaticResource IconBook}" Width="14" Height="14" />
+                    <TextBlock Text="{l:T Examples.Browse}" />
+                  </StackPanel>
+                </Button>
+                <Button Classes="tool" Command="{Binding OpenDemoCommand}" ToolTip.Tip="{l:T Examples.DemoTip}">
+                  <TextBlock Text="{l:T Examples.Demo}" />
+                </Button>
+              </StackPanel>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <!-- ===== Status bar =====
+         Columns: Csound version · editor hint (replaced by the DAW link text when linked; both share
+         column 1) · audio statistics (DSP, dropouts) · cursor «Ln, Col» + word occurrences · file type. -->
+    <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="14,0">
+      <TextBlock Text="{Binding CsoundVersion}" Classes="dim" FontSize="11" VerticalAlignment="Center" ToolTip.Tip="{l:T MW088}" />
+      <TextBlock Grid.Column="1" Classes="dim" FontSize="11" VerticalAlignment="Center" Margin="20,0" TextTrimming="CharacterEllipsis"
+                 IsVisible="{Binding DawLinkText, Converter={x:Static StringConverters.IsNullOrEmpty}}"
+                 Text="{l:T MW089}" />
+      <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="{Binding DawLinkText}" FontSize="11" VerticalAlignment="Center" Margin="0,0,18,0"
+                 Foreground="{DynamicResource GoodBrush}" ToolTip.Tip="{l:T Daw.LinkTip}" />
+      <TextBlock Grid.Column="2" Text="{Binding AudioStats}" FontSize="11" VerticalAlignment="Center" Margin="0,0,18,0"
+                 Foreground="{DynamicResource AccentHiBrush}" FontFamily="{StaticResource CodeFont}"
+                 ToolTip.Tip="{l:T MW090}" />
+      <TextBlock Grid.Column="3" Text="{Binding CursorText}" Classes="dim" FontSize="11" VerticalAlignment="Center" Margin="0,0,18,0" ToolTip.Tip="{l:T MW091}" />
+      <TextBlock Grid.Column="4" Text="Csound · CSD" Classes="dim" FontSize="11" VerticalAlignment="Center" ToolTip.Tip="{l:T MW092}" />
+    </Grid>
+
+    <!-- ===== Enlarged watch: a quarter of the window, centred, everything else dimmed.
+         Click the dimmed area (or Esc) to close. =====
+         The 3×3 star grid (*,2*,*) puts the card in the middle half of each dimension; spanning the
+         three root rows, it also covers the title bar and status bar. Shown while
+         MainViewModel.FocusedWatch is set (IsWatchFocused). -->
+    <Grid Grid.RowSpan="3" IsVisible="{Binding IsWatchFocused}" ColumnDefinitions="*,2*,*" RowDefinitions="*,2*,*">
+      <Border x:Name="WatchDim" Grid.ColumnSpan="3" Grid.RowSpan="3" Background="#B0000000" />
+      <Border Grid.Column="1" Grid.Row="1" Classes="card" Padding="22,18" BoxShadow="0 16 48 0 #C0000000"
+              BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5">
+        <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <TextBlock Text="{Binding FocusedWatch.Name, FallbackValue=''}" FontFamily="{StaticResource CodeFont}" FontSize="24"
+                         FontWeight="SemiBold" Foreground="{DynamicResource AccentHiBrush}" />
+              <TextBlock Text="{Binding FocusedWatch.Scope, FallbackValue=''}" Classes="dim" FontSize="14" VerticalAlignment="Bottom" Margin="0,0,0,3" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="tool" Command="{Binding CloseFocusedWatchCommand}" ToolTip.Tip="{l:T Watch.Close}">
+              <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+            </Button>
+          </Grid>
+          <TextBlock Grid.Row="1" Text="{Binding FocusedWatch.ValueText, FallbackValue=''}" FontFamily="{StaticResource CodeFont}" FontSize="40"
+                     Foreground="{DynamicResource GoodBrush}" Margin="0,6,0,10" />
+          <c:Sparkline Grid.Row="2" Values="{Binding FocusedWatch.History, FallbackValue={x:Null}}" MinHeight="80" />
+          <TextBlock Grid.Row="3" Text="{Binding FocusedWatch.DetailText, FallbackValue=''}" Classes="dim" FontSize="13" TextWrapping="Wrap" Margin="0,10,0,0" />
+          <TextBlock Grid.Row="4" Text="{l:T Watch.CloseHint}" Classes="dim" FontSize="11" Margin="0,8,0,0" HorizontalAlignment="Right" />
+        </Grid>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>

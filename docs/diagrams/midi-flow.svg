@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .fut { fill: var(--surface, #0a1222); stroke: var(--dim, #5a7bb8); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#mm); }
+  </style>
+  <defs><marker id="mm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="200" height="60" rx="10"/><text class="t" x="35" y="57">WinMM input (MIDI 1.0)</text><text class="d" x="35" y="77">Impact LX61+, UR22mkII…</text>
+  <rect class="box" x="20" y="110" width="200" height="60" rx="10"/><text class="t" x="35" y="137">Windows MIDI Services</text><text class="d" x="35" y="157">MIDI 2.0 · UMP · 16/32-bit</text>
+  <rect class="box" x="20" y="190" width="200" height="60" rx="10"/><text class="t" x="35" y="217">On-screen keyboard</text><text class="d" x="35" y="237">mouse · PC keys</text>
+
+  <rect class="box" x="290" y="100" width="210" height="90" rx="12"/>
+  <text class="t" x="305" y="128">MidiHub</text>
+  <text class="d" x="305" y="150">MidiMessage: 0…1 values</text>
+  <text class="d" x="305" y="168">16-bit vel · 32-bit CC ready</text>
+
+  <rect class="box" x="580" y="20" width="300" height="60" rx="10"/><text class="t" x="595" y="47">Csound (host MIDI I/O)</text><text class="d" x="595" y="67">read callback each k-cycle · massign · notnum</text>
+  <rect class="box" x="580" y="100" width="300" height="60" rx="10"/><text class="t" x="595" y="127">MIDI learn → sliders</text><text class="d" x="595" y="147">"channel:cc" → control channel (lin/exp)</text>
+  <rect class="box" x="580" y="180" width="300" height="60" rx="10"/><text class="t" x="595" y="207">MIDI monitor + key highlight</text><text class="d" x="595" y="227">drained by the UI every frame</text>
+
+  <path class="a" d="M220 60 C255 60 255 130 288 130"/>
+  <path class="a" d="M220 140 H288"/>
+  <path class="a" d="M220 220 C255 220 255 160 288 160"/>
+  <path class="a" d="M500 120 C540 120 540 50 578 50"/>
+  <path class="a" d="M500 145 H578"/>
+  <path class="a" d="M500 170 C540 170 540 210 578 210"/>
+
+  <text class="d" x="20" y="300">Whole messages are queued (never bytes), so the driver thread and the UI can produce at the same time safely.</text>
+  <text class="d" x="20" y="322">Csound receives MIDI 1.0 bytes; high-resolution values stay available to the app (mappings use the full 0…1 value).</text>
+</svg>

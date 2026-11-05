@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ayuda al pasar el mouse y valores en vivo · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="" href="../en/editor-intelligence.html">English</a><a class="on" href="../es/inteligencia-del-editor.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Resumen</a><a class="" href="guia-de-usuario.html">Guía de usuario</a><a class="" href="motor-de-audio.html">Motor de audio y latencia</a><a class="on" href="inteligencia-del-editor.html">Ayuda al pasar el mouse y valores en vivo</a><a class="" href="midi.html">MIDI 2.0 y clásico</a><a class="" href="visual-3d.html">Vistas 3D</a><a class="" href="herramientas-musicales.html">Piano roll y secuenciador</a><a class="" href="salas-de-pintura.html">Paint Rooms (pintar sonido)</a><a class="" href="vst3-cubase.html">Csound en Cubase (VST3)</a><a class="" href="host-vst3.html">Plugins VST3 en la app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Instrumentos Cabbage</a><a class="" href="arquitectura.html">Arquitectura</a><a class="" href="hoja-de-ruta.html">Hoja de ruta</a></nav></aside>
+  <main class="content">
+<h1 id="ayuda-al-pasar-el-mouse-y-valores-en-vivo">Ayuda al pasar el mouse y valores en vivo</h1>
+<p><figure class="diagram" role="img" aria-label="Ayuda al pasar el mouse y arrastrar valores"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" font-family="Segoe UI, sans-serif" font-size="14">
+  <style>
+    .box { fill: var(--surface2, #0e1a30); stroke: var(--accent, #1e6bff); stroke-width: 1.5; }
+    .t { fill: var(--text, #a8ccff); }
+    .d { fill: var(--dim, #5a7bb8); font-size: 12px; }
+    .a { stroke: var(--accent, #1e6bff); stroke-width: 1.7; fill: none; marker-end: url(#m); }
+  </style>
+  <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e6bff"/></marker></defs>
+
+  <rect class="box" x="20" y="30" width="160" height="60" rx="10"/><text class="t" x="35" y="58">Mouse over token</text><text class="d" x="35" y="78">350 ms rest</text>
+  <rect class="box" x="220" y="30" width="200" height="60" rx="10"/><text class="t" x="235" y="58">CsoundAnalyzer.Inspect</text><text class="d" x="235" y="78">kind · definition · range</text>
+  <rect class="box" x="460" y="30" width="180" height="60" rx="10"/><text class="t" x="475" y="58">Hover card</text><text class="d" x="475" y="78">help · range bar · value</text>
+  <path class="a" d="M180 60 H218"/><path class="a" d="M420 60 H458"/>
+
+  <rect class="box" x="20" y="150" width="160" height="60" rx="10"/><text class="t" x="35" y="178">Press + drag</text><text class="d" x="35" y="198">→ ↑ up · ← ↓ down</text>
+  <rect class="box" x="220" y="120" width="200" height="56" rx="10"/><text class="t" x="235" y="146">Channel token</text><text class="d" x="235" y="164">kcut chnget "cutoff"</text>
+  <rect class="box" x="220" y="190" width="200" height="56" rx="10"/><text class="t" x="235" y="216">Numeric literal</text><text class="d" x="235" y="234">0.25 in instr Voice</text>
+  <rect class="box" x="460" y="120" width="200" height="56" rx="10"/><text class="t" x="475" y="146">Slider + engine</text><text class="d" x="475" y="164">SetControl every cycle</text>
+  <rect class="box" x="460" y="190" width="200" height="56" rx="10"/><text class="t" x="475" y="216">Rewrite text</text><text class="d" x="475" y="234">one undo group</text>
+  <rect class="box" x="700" y="190" width="180" height="56" rx="10"/><text class="t" x="715" y="216">CompileOrc(instr)</text><text class="d" x="715" y="234">throttled 120 ms</text>
+  <path class="a" d="M180 172 H218"/><path class="a" d="M180 190 L218 214"/>
+  <path class="a" d="M420 148 H458"/><path class="a" d="M420 218 H458"/><path class="a" d="M660 218 H698"/>
+
+  <rect class="box" x="20" y="270" width="860" height="44" rx="10"/>
+  <text class="t" x="35" y="297">Esc while dragging → channel restored / undo group reverted (and recompiled) → value before the drag</text>
+</svg>
+<figcaption>Ayuda al pasar el mouse y arrastrar valores</figcaption></figure></p>
+<h2 id="la-tarjeta-de-ayuda">La tarjeta de ayuda</h2>
+<p>Deja el mouse quieto ≈⅓ de segundo sobre algo del código:</p>
+<table><thead><tr><th>Sobre…</th><th>La tarjeta muestra</th></tr></thead><tbody><tr><td>una <strong>variable</strong> (<code>kcut</code>, <code>aL</code>, <code>gaRevL</code>)</td><td>tipo (audio/control/init/texto, global o local), dónde se define, dónde se reasigna, cuántas veces se usa, qué hace (lee un canal, es una envolvente ADSR de 0 a 1, un oscilador de ±amp, un aleatorio entre a y b…) y su <strong>rango posible</strong></td></tr><tr><td>un <strong>número</strong></td><td>qué argumento de qué opcode es, el tipo que espera el opcode, un rango sugerido (corte, resonancia, paneo, tiempos de ADSR…), los campos de <code>chnk</code>, las constantes del encabezado y los p-fields de la partitura</td></tr><tr><td>un <strong>p-field</strong> (<code>p4</code>)</td><td>qué significa, los valores que toma en la partitura y las expresiones que le mandan <code>schedule</code>/<code>schedulek</code>/<code>event</code></td></tr><tr><td>un <strong>nombre de canal</strong> (<code>&quot;cutoff&quot;</code>)</td><td>su rango y valor actual</td></tr><tr><td>un <strong>opcode</strong></td><td>sus firmas legibles (entradas y salidas)</td></tr></tbody></table>
+<h3 id="valores-en-vivo">Valores en vivo</h3>
+<p>Mientras suena, la tarjeta de una variable muestra además <strong>su valor en este instante</strong>, el mínimo y el máximo vistos, cuántas notas del instrumento están activas y una <strong>mini gráfica</strong> de los últimos ≈3 segundos. Para variables de audio se muestra el pico del bloque.</p>
+<p>Se usa el debugger de Csound 7 (<code>csoundSetDebugCallback</code>): después de cada ciclo de control, ≈30 veces por segundo, la app lee las variables de cada instancia activa. Si hay varias notas del mismo instrumento, muestra la más reciente. Se puede desactivar con <strong>Valores en vivo</strong> en la tarjeta <em>Observar</em>.</p>
+<h3 id="observar">Observar</h3>
+<p>Clic derecho sobre una variable › <strong>Observar «nombre»</strong> la fija en el panel <em>Observar</em> con su valor, rango y gráfica en vivo. El mismo menú ofrece <strong>Ir a la definición</strong>, <strong>Ayuda del opcode (F1)</strong>, deshacer/rehacer y cortar/copiar/pegar.</p>
+<h2 id="arrastrar-para-cambiar-valores">Arrastrar para cambiar valores</h2>
+<p>Presiona sobre una variable que lee un canal, sobre un nombre de canal o sobre un número, y mueve el mouse:</p>
+<ul><li><strong>derecha o arriba</strong> sube, <strong>izquierda o abajo</strong> baja, siempre dentro del mínimo y el máximo;</li><li><strong>Shift</strong> = 10 veces más fino, <strong>Ctrl</strong> = 10 veces más rápido;</li><li><strong>Esc</strong> (sin soltar) vuelve al valor de antes;</li><li>un clic sin mover se comporta como un clic normal.</li></ul>
+<table><thead><tr><th>Lo que arrastras</th><th>Qué cambia</th></tr></thead><tbody><tr><td>Variable que lee un canal (<code>kcut chnget &quot;cutoff&quot;</code>) o el nombre del canal</td><td>El canal, en tiempo real, y su slider. El código no cambia.</td></tr><tr><td>Número dentro de un <code>instr</code></td><td>El número en el código; <strong>mientras suena se recompila el instrumento</strong> (cada 120 ms como máximo) y las notas nuevas usan el valor nuevo.</td></tr><tr><td>Valor por defecto de un <code>chnk</code></td><td>El número en el código y el canal en vivo.</td></tr><tr><td>Número del encabezado o de la partitura</td><td>El número en el código; se aplica al volver a tocar.</td></tr></tbody></table>
+<p>Un arrastre completo es un solo paso de deshacer (Ctrl+Z).</p>
+<h2 id="autocompletar-y-manual">Autocompletar y manual</h2>
+<ul><li>Después de dos letras aparece la lista: variables del archivo, palabras clave y opcodes con su firma. Enter o Tab acepta, Esc cierra. <strong>Ctrl+Espacio</strong> la abre a mano.</li><li><strong>F1</strong> sobre un opcode abre su página del manual de Csound.</li></ul>
+<h2 id="live-coding">Live coding</h2>
+<ul><li><strong>Ctrl+Enter</strong>: evalúa la selección o el <code>instr … endin</code> bajo el cursor sin cortar el audio (<code>csoundCompileOrc</code>). Las líneas evaluadas destellan en verde.</li><li><strong>Ctrl+Shift+Enter</strong>: envía la línea de partitura bajo el cursor (o las seleccionadas) como eventos en vivo.</li></ul>
+<h2 id="breakpoints">Breakpoints</h2>
+<p>Detener la interpretación en una línea de un instrumento y ver todas las variables de esa nota.</p>
+<table><thead><tr><th>Acción</th><th>Cómo</th></tr></thead><tbody><tr><td>Poner / quitar un breakpoint</td><td>Clic en la franja angosta a la izquierda de los números de línea (aparece un punto rojo), <strong>F9</strong> en la línea del cursor, o clic derecho › <em>Poner breakpoint</em></td></tr><tr><td>Quitar todos</td><td><strong>Shift+F9</strong>, clic derecho › <em>Quitar todos los breakpoints</em>, o <em>Quitar todos</em> en el panel Depurar</td></tr><tr><td>Continuar</td><td><strong>F5</strong> en pausa (si no, F5 es Tocar) o <em>Continuar</em></td></tr><tr><td>Siguiente ciclo de control</td><td><strong>F10</strong> en pausa o <em>Siguiente ciclo</em></td></tr><tr><td>Detener</td><td><em>Detener</em> en el panel Depurar, o Shift+F5</td></tr></tbody></table>
+<p>Cuando una nota llega a la línea, Csound se detiene <strong>antes</strong> de ejecutarla: el dispositivo sigue andando pero suena <strong>silencio</strong> (no se cuentan cortes), la línea se pone amarilla con una flecha en el margen, el editor la muestra, la barra de estado dice «⏸ En pausa en la línea 42 · instr Voice · F5 continuar» y se abre el panel <strong>Depurar</strong> sobre el lado derecho del editor con:</p>
+<ul><li>el instrumento, la línea y el opcode que viene, qué nota es («nota 2 de 3»), p1, p2, p3, el tiempo de la partitura y el contador de ciclos de control de Csound;</li><li>todas las variables locales (nombre, tasa, valor): <code>i</code>/<code>k</code> como número, <code>a</code> como RMS y pico del bloque más sus primeras muestras, arreglos con sus primeros elementos, cadenas <code>S</code>, señales <code>f</code> con el tamaño de la FFT y el bin más fuerte; después las globales (<code>gk…</code>, <code>ga…</code>, <code>gi…</code>).</li></ul>
+<p><strong>Continuar o siguiente ciclo.</strong> Una línea corre una vez por ciclo de control (cientos de veces por segundo), así que <em>Continuar</em> solo se detiene donde una nota <strong>todavía no</strong> se detuvo: otra línea con breakpoint, otra nota que suena al mismo tiempo, o la próxima nota nueva. <em>Siguiente ciclo</em> se detiene en el próximo breakpoint, como mucho la misma línea un ciclo de control (ksmps muestras) después: sirve para ver avanzar una envolvente paso a paso.</p>
+<p>Dónde funciona:</p>
+<ul><li>solo en líneas dentro de <code>instr … endin</code> que corren a tasa k o a. Las líneas que solo corren al empezar la nota (<code>ifreq = p4</code>), las líneas <code>instr</code>/<code>endin</code>, líneas vacías, comentarios, el encabezado y el cuerpo de los UDO no pueden detenerse: al hacer clic, la barra de estado explica por qué. Para un UDO, pon el breakpoint en la línea del instrumento que lo llama;</li><li>solo al <strong>tocar</strong> con el motor de audio de la app (Configuración › Audio › Windows · WASAPI). Al renderizar a WAV, o con un módulo de Csound (PortAudio/ASIO), se ignoran y la consola lo dice una vez;</li><li>los breakpoints son del archivo abierto, siguen a su línea mientras editas y duran la sesión (no se guardan en el .csd).</li></ul>
+<p>Los breakpoints que pones mientras suena funcionan al tiro si <em>Valores en vivo</em> está activo (lo normal), porque las dos funciones usan el depurador de Csound. Con <em>Valores en vivo</em> apagado, pon al menos un breakpoint antes de Tocar.</p>
+<p><strong>Editar mientras suena o en pausa.</strong> Los números de línea de Csound son los del código que está corriendo. Si insertas líneas sobre un instrumento, la app sabe dónde quedó cada línea que corre (la pausa se muestra en la línea correcta). <strong>Ctrl+Enter</strong> (o arrastrar un número) recompila el instrumento numerado como lo muestra el editor ahora, y sus breakpoints pasan al código nuevo. Una recompilación pedida en pausa se aplica al continuar.</p>
+<p>Límites del depurador de Csound 7.0 (verificados; la app los esquiva donde se puede):</p>
+<ul><li>solo se detiene <em>antes</em> de una línea, no entre los opcodes de una misma línea, y no hay «entrar al UDO» ni «ir a la línea siguiente»: <em>Siguiente ciclo</em> es el paso más fino;</li><li>las operaciones de una expresión a veces quedan marcadas con la línea siguiente (un breakpoint en <code>kcut = 500 + kenv * 2000</code> puede detenerse en <code>=</code> mientras el <code>*</code> pertenece a la línea de abajo);</li><li>al reanudar a mitad de una línea con varios opcodes, Csound se detendría para siempre en el mismo opcode e informa la nota equivocada en las pausas siguientes del mismo ciclo; la app quita esa línea por el resto del ciclo y la vuelve a poner antes del siguiente;</li><li>si dos notas del mismo instrumento se detienen en el mismo ciclo, el panel muestra la primera.</li></ul>
+<p>Prueba sin sonido (usa el motor WASAPI real, silenciado): <code>CsoundVisual.exe --breakpoint-test archivo.csd LÍNEA [DESPLAZAMIENTO]</code> imprime las variables en cada pausa y comprueba la pausa, el tiempo congelado sin cortes, el siguiente ciclo, continuar a otra nota, una recompilación desplazada en DESPLAZAMIENTO líneas, quitar todos y detener en pausa.</p>
+<p>Código: <code>src/CsoundVisual/Editor/</code> (<code>CsoundAnalyzer</code>, <code>ScrubController</code>, <code>CompletionProvider</code>) y <code>Engine/LiveValueMonitor.cs</code>; breakpoints: <code>Editor/Breakpoints.cs</code>, <code>Engine/BreakpointSession.cs</code>, <code>Engine/CsoundEngine.Debugger.cs</code>, <code>ViewModels/MainViewModel.Debug.cs</code>, <code>Views/DebugPanel.cs</code>.</p>
+  </main>
+</div>
+</body>
+</html>

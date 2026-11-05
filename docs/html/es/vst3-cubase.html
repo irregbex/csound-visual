@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Csound en Cubase (VST3) · Csound Visual</title>
+<link rel="icon" href="../app.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><img src="../app.png" alt="" width="28" height="28"> Csound Visual</a>
+  <nav class="langs"><a class="" href="../en/vst3-cubase.html">English</a><a class="on" href="../es/vst3-cubase.html">Español</a></nav>
+</header>
+<div class="layout">
+  <aside class="side"><nav><a class="" href="index.html">Resumen</a><a class="" href="guia-de-usuario.html">Guía de usuario</a><a class="" href="motor-de-audio.html">Motor de audio y latencia</a><a class="" href="inteligencia-del-editor.html">Ayuda al pasar el mouse y valores en vivo</a><a class="" href="midi.html">MIDI 2.0 y clásico</a><a class="" href="visual-3d.html">Vistas 3D</a><a class="" href="herramientas-musicales.html">Piano roll y secuenciador</a><a class="" href="salas-de-pintura.html">Paint Rooms (pintar sonido)</a><a class="on" href="vst3-cubase.html">Csound en Cubase (VST3)</a><a class="" href="host-vst3.html">Plugins VST3 en la app</a><a class="" href="ableton-link.html">Ableton Link</a><a class="" href="cabbage.html">Instrumentos Cabbage</a><a class="" href="arquitectura.html">Arquitectura</a><a class="" href="hoja-de-ruta.html">Hoja de ruta</a></nav></aside>
+  <main class="content">
+<h1 id="csound-dentro-de-cubase-vst3">Csound dentro de Cubase (VST3)</h1>
+<p>Csound Visual trae dos plugins VST3 que llevan <strong>Csound 7 adentro</strong>:</p>
+<table><thead><tr><th>Plugin</th><th>Dónde va en Cubase</th><th>Qué hace</th></tr></thead><tbody><tr><td><strong>Csound Visual Instrument</strong></td><td>Pista de instrumento</td><td>Sintetizador que se toca con MIDI. Por defecto: «Velvet Poly», un pad polifónico con chorus y reverb.</td></tr><tr><td><strong>Csound Visual FX</strong></td><td>Inserto de una pista de audio</td><td>Efecto sobre el audio de la pista. Por defecto: «Wide Echo Space», delay ping-pong modulado + chorus + reverb.</td></tr></tbody></table>
+<p>La gracia: <strong>cualquier orquesta que escribas en Csound Visual se puede mandar al plugin</strong> con el botón <strong>Enviar al DAW</strong>, y suena dentro de tu proyecto de Cubase, con tus pistas, tu mezcla y tus efectos.</p>
+<h2 id="instalación">Instalación</h2>
+<p>Ya están instalados en <code>%LOCALAPPDATA%\Programs\Common\VST3\CsoundVisual.vst3</code> (la carpeta de plugins VST3 del usuario, que Cubase revisa sola). El plugin es autónomo: lleva su propia copia de Csound, no depende de dónde esté instalado.</p>
+<p>Para recompilarlo: <code>powershell -ExecutionPolicy Bypass -File tools\build_vst.ps1</code> (con Cubase cerrado, porque Windows bloquea el plugin cargado).</p>
+<h2 id="paso-a-paso-en-cubase-15">Paso a paso en Cubase 15</h2>
+<ol><li>Abre Cubase. Si no aparecen los plugins: <strong>Studio › VST Plug-in Manager</strong>, revisa que la ruta <code>C:\Users\&lt;tú&gt;\AppData\Local\Programs\Common\VST3</code> esté en las rutas VST 3 y aprieta <strong>Rescan</strong>.</li><li>Crea una <strong>pista de instrumento</strong> y elige <strong>Csound Visual Instrument</strong> (fabricante «Csound Visual»). Toca tu teclado: debe sonar el pad.</li><li>En Csound Visual abre una orquesta (la demo, un ejemplo o una pieza de la galería) y aprieta <strong>Enviar al DAW</strong> › elige la pista. Los mensajes de Csound del plugin aparecen en la consola de la app.</li><li>La tarjeta de salida de la app se pone <strong>verde</strong> y pasa a llamarse <strong>SALIDA VST3</strong>: el osciloscopio, el espectro y los medidores muestran lo que suena <strong>dentro de Cubase</strong>, aunque la app no esté tocando.</li><li>Desde ese momento <strong>los sliders de la app controlan el plugin</strong> (la barra de estado muestra «⇄ pista · orquesta»). En Cubase, los mismos controles aparecen como parámetros del plugin con el nombre de cada canal (<code>cutoff</code>, <code>reverb</code>…): se pueden <strong>automatizar</strong> y grabar.</li><li>Para un efecto: en una pista de audio, inserta <strong>Csound Visual FX</strong> y envía una orquesta que lea la entrada con <code>inch 1, 2</code> (o <code>ain1, ain2 ins</code>).</li></ol>
+<h2 id="lo-que-el-plugin-le-da-a-la-orquesta">Lo que el plugin le da a la orquesta</h2>
+<ul><li><strong>Audio</strong>: la frecuencia de muestreo de Cubase reemplaza al <code>sr</code> del archivo; estéreo de entrada (FX) y de salida.</li><li><strong>MIDI</strong>: notas, pitch bend, modulación (CC1), CC2, CC11, sustain (CC64) y aftertouch. <code>massign</code> y los instrumentos MIDI funcionan igual que en la app.</li><li><strong>Tempo y transporte</strong> en canales que la orquesta puede leer con <code>chnget</code>: <code>HOST_BPM</code>, <code>HOST_PLAYING</code> (0/1), <code>HOST_PPQ</code> (posición en negras) y <code>HOST_SR</code>.</li><li><strong>16 parámetros automatizables</strong> que toman el nombre y el rango de los primeros 16 canales <code>chnk</code> de la orquesta.</li><li><strong>El proyecto recuerda la orquesta</strong>: al guardar el proyecto de Cubase se guardan el código y los valores.</li></ul>
+<h2 id="limitaciones">Limitaciones</h2>
+<ul><li>No tiene ventana propia: Cubase muestra su editor genérico de parámetros. El código se edita en Csound Visual y se envía.</li><li>Latencia fija de <em>ksmps</em> muestras (Cubase la compensa sola): conviene un ksmps chico (32 o 64).</li><li>La partitura empieza al compilar, no con el transporte de Cubase: para sincronizar usa <code>HOST_PLAYING</code> y <code>HOST_PPQ</code>.</li><li>Las rutas a archivos de sonido dentro de una orquesta deben ser absolutas.</li></ul>
+<p>Detalles técnicos (arquitectura, hilos, protocolo): <code>src\CsoundVST\README.md</code>.</p>
+  </main>
+</div>
+</body>
+</html>

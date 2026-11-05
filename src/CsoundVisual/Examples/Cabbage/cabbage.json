@@ -1,0 +1,25 @@
+{
+  "pieces": [
+    {
+      "file": "Cabbage/01_knob_synth.csd",
+      "title": "Cabbage: knob synth",
+      "titleEs": "Cabbage: sinte de perillas",
+      "description": "A Cabbage instrument: knobs, sliders, a combobox and a keyboard declared in its <Cabbage> section, drawn by Csound Visual in the «Cabbage UI» card. Press Play and click the keyboard (or play MIDI); turn Cutoff and Resonance while notes sound.",
+      "descriptionEs": "Un instrumento Cabbage: perillas, sliders, un selector y un teclado declarados en su sección <Cabbage>, que Csound Visual dibuja en la tarjeta «Interfaz Cabbage». Presiona Tocar y haz clic en el teclado (o toca MIDI); gira Cutoff y Resonance mientras suenan las notas."
+    },
+    {
+      "file": "Cabbage/02_xy_space_delay.csd",
+      "title": "Cabbage: XY space delay",
+      "titleEs": "Cabbage: delay espacial XY",
+      "description": "An effect with an XY pad: drag the ball to set delay time (X) and feedback (Y). Freeze holds the echoes, Ping! fires a note into them. Works on a built-in loop or on the live audio input. Uses cabbageGetValue, which Csound Visual provides automatically.",
+      "descriptionEs": "Un efecto con pad XY: arrastra la bola para fijar el tiempo de delay (X) y la realimentación (Y). Freeze congela los ecos y Ping! dispara una nota en ellos. Funciona con un loop interno o con la entrada de audio en vivo. Usa cabbageGetValue, que Csound Visual provee automáticamente."
+    },
+    {
+      "file": "Cabbage/03_drum_toy.csd",
+      "title": "Cabbage: drum toy",
+      "titleEs": "Cabbage: caja de ritmos de juguete",
+      "description": "An 8-step drum machine made only of Cabbage widgets: click the squares to build a beat, change tempo and swing while it plays, hold «fill» for a snare roll and crush the bits for a lo-fi sound.",
+      "descriptionEs": "Una caja de ritmos de 8 pasos hecha solo con controles Cabbage: haz clic en los cuadros para armar un ritmo, cambia tempo y swing mientras suena, mantén «fill» para un redoble y reduce los bits para un sonido lo-fi."
+    }
+  ]
+}

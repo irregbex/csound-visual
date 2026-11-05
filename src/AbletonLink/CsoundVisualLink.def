@@ -1,0 +1,53 @@
+; Exports of CsoundVisualLink.dll: the abl_link C API of Ableton Link 3.1.5
+; (extensions/abl_link/include/abl_link.h). Consumed by Integration/AbletonLinkNative.cs.
+;
+; Why a .def file: abl_link.h declares the functions extern "C" but without
+; __declspec(dllexport), and we compile Ableton's abl_link.cpp unmodified. Listing the names
+; here exports them undecorated, exactly as written, which is how AbletonLinkNative.cs looks
+; them up (NativeLibrary.GetExport by name). The full abl_link API is exported, even the
+; functions the app does not call, so the DLL is a complete Link C API.
+;
+; Conventions (see abl_link.h for the authoritative documentation):
+;   * abl_link and abl_link_session_state are opaque handles; every *_create has a matching
+;     *_destroy that the caller must call.
+;   * Times are microseconds of the Link clock (abl_link_clock_micros); beats are doubles;
+;     `quantum` is the number of beats per bar/phase cycle.
+;   * "audio" session-state functions are realtime-safe and must only be used from the audio
+;     thread; "app" ones may block briefly and are for any other thread.
+;   * Callbacks are invoked on a Link-managed thread.
+LIBRARY CsoundVisualLink
+EXPORTS
+    ; --- instance lifetime and enabling ---
+    abl_link_create                      ; new Link instance with an initial tempo (BPM); disabled until abl_link_enable
+    abl_link_destroy                     ; destroys an instance (leaves the session)
+    abl_link_is_enabled                  ; is the instance taking part in the network session?
+    abl_link_enable                      ; joins/leaves the session (starts/stops network discovery)
+    abl_link_is_start_stop_sync_enabled  ; is transport start/stop shared with peers?
+    abl_link_enable_start_stop_sync      ; opt in/out of sharing transport start/stop
+    abl_link_num_peers                   ; number of OTHER peers currently in the session
+    ; --- notifications (called on a Link thread) ---
+    abl_link_set_num_peers_callback      ; peer count changed
+    abl_link_set_tempo_callback          ; session tempo changed
+    abl_link_set_start_stop_callback     ; session transport started/stopped
+    ; --- clock ---
+    abl_link_clock_micros                ; current Link clock time in microseconds (QueryPerformanceCounter based)
+    ; --- session state snapshots ---
+    abl_link_create_session_state        ; allocates a session-state object to capture into
+    abl_link_destroy_session_state       ; frees it
+    abl_link_capture_audio_session_state ; snapshot of the session, realtime-safe (audio thread only)
+    abl_link_commit_audio_session_state  ; publishes changes made to the snapshot (audio thread only)
+    abl_link_capture_app_session_state   ; snapshot from a non-audio thread
+    abl_link_commit_app_session_state    ; publishes changes from a non-audio thread
+    ; --- reading/modifying a captured session state ---
+    abl_link_tempo                       ; tempo in BPM
+    abl_link_set_tempo                   ; proposes a new tempo from a given time on
+    abl_link_beat_at_time                ; beat value at a clock time, for a quantum
+    abl_link_phase_at_time               ; phase (0..quantum) at a clock time
+    abl_link_time_at_beat                ; clock time at which a beat occurs
+    abl_link_request_beat_at_time        ; maps a beat to a time, quantised so the phase stays aligned with peers
+    abl_link_force_beat_at_time          ; maps a beat to a time unconditionally (rewrites the shared timeline)
+    abl_link_set_is_playing              ; sets transport playing/stopped at a time
+    abl_link_is_playing                  ; is the transport playing?
+    abl_link_time_for_is_playing         ; clock time of the last start/stop change
+    abl_link_request_beat_at_start_playing_time   ; maps a beat to the transport start time
+    abl_link_set_is_playing_and_request_beat_at_time ; start/stop and map a beat to a time in one step

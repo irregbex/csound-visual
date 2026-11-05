@@ -1,0 +1,329 @@
+<!--
+  Application styles layered on top of Avalonia's Fluent theme: icon geometries and the style
+  classes used by the views (card, tool, primary, tabs, tabclose, console, line.*). All colours
+  come from the active preset of Theming/AppTheme.cs (default «Azul deportivo») through
+  DynamicResource, so changing the preset in «Apariencia» recolours everything live.
+
+  Included by App.axaml after FluentTheme and AvaloniaEdit's styles, so these selectors override
+  the library defaults. Views opt in by adding a class (Classes="card", Classes="tool"...).
+
+  Brush resources used below (all «<Role>Brush», registered by AppTheme.Apply from the roles in
+  AppTheme.ResourceRoles; a "_NN" suffix, as in Accent_40Brush, means the role colour with the
+  hexadecimal alpha NN):
+    SurfaceBrush/Surface2Brush - panel backgrounds (Surface2 = one level lighter, hover bands)
+    LineBrush - borders and separators;  TextBrush/TextDimBrush/TextFaintBrush - text levels
+    AccentBrush/AccentHiBrush - preset accent and its brighter hover/highlight variant
+    OnAccentBrush - text drawn on an accent fill;  DisabledBrush - disabled foreground
+    GoodBrush/WarnBrush/DangerBrush - status colours (ok/running, warning, error)
+  A brush used here that AppTheme does not register would silently resolve to nothing, so new
+  roles must be added to AppTheme.ResourceRoles first.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ae="using:AvaloniaEdit">
+
+  <!-- Colour brushes («BgBrush», «AccentBrush»…) are not defined here: AppTheme registers them
+       as application resources from the chosen preset, so they are used with DynamicResource
+       and the whole app recolours live when the preset changes. -->
+  <Styles.Resources>
+    <!-- Monospaced font for the code editor and the console (StaticResource: it never changes at
+         run time). A fallback list: the first family installed on the PC is used. -->
+    <FontFamily x:Key="CodeFont">Cascadia Code, Cascadia Mono, Consolas, monospace</FontFamily>
+
+    <!-- Icons (24x24 path data). Used as {StaticResource IconXxx} in PathIcon.Data, mostly in the
+         toolbar; they carry no colour (PathIcon paints them with its Foreground, i.e. the button's
+         text brush). Paths starting with "F1" use the non-zero fill rule instead of the default
+         even-odd rule, so whether an inner sub-path is a hole depends on its drawing direction. -->
+    <StreamGeometry x:Key="IconNew">M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5zM11 12v3H8v2h3v3h2v-3h3v-2h-3v-3h-2z</StreamGeometry>
+    <StreamGeometry x:Key="IconOpen">M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H8.5a2 2 0 0 0-1.9 1.4L4 18.5V6zm4.5 5h15l-3 9H4.5l3-9z</StreamGeometry>
+    <StreamGeometry x:Key="IconSave">M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 2v5h9V5H7zm5 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z</StreamGeometry>
+    <StreamGeometry x:Key="IconPlay">M8 5.1v13.8a1 1 0 0 0 1.5.86l11-6.9a1 1 0 0 0 0-1.72l-11-6.9A1 1 0 0 0 8 5.1z</StreamGeometry>
+    <StreamGeometry x:Key="IconStop">M7 6h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z</StreamGeometry>
+    <StreamGeometry x:Key="IconRender">M3 12h2v0l2-6 3 12 3-14 3 10 2-4h3v2h-1.8l-3.4 6.4L13 8.5 10 21 6.8 9.6 6.4 12H3z</StreamGeometry>
+    <StreamGeometry x:Key="IconPanel">M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm10 2v12h6V6h-6z</StreamGeometry>
+    <StreamGeometry x:Key="IconWave">M2 12c2-6 4-6 6 0s4 6 6 0 4-6 6 0 2 3 2 3v2s-1-3-2-3-2 6-6 0-4-6-6 0-4 6-6 0c-.6-1.8-1.2-2.7-2-3z</StreamGeometry>
+    <StreamGeometry x:Key="IconClear">M7 4h10l-1 16H8L7 4zm-3 0h16v2H4V4zm6-2h4v2h-4V2z</StreamGeometry>
+    <StreamGeometry x:Key="IconSend">M3 20l18-8L3 4v6l12 2-12 2v6z</StreamGeometry>
+    <StreamGeometry x:Key="IconClose">M5.3 3.9L12 10.6l6.7-6.7 1.4 1.4-6.7 6.7 6.7 6.7-1.4 1.4-6.7-6.7-6.7 6.7-1.4-1.4 6.7-6.7-6.7-6.7z</StreamGeometry>
+    <StreamGeometry x:Key="IconCube">M12 2l9 5v10l-9 5-9-5V7l9-5zm0 2.3L5.5 7.9 12 11.5l6.5-3.6L12 4.3zM5 9.6v6.2l6 3.3v-6.2L5 9.6zm14 0l-6 3.3v6.2l6-3.3V9.6z</StreamGeometry>
+    <StreamGeometry x:Key="IconPlus">M11 3h2v8h8v2h-8v8h-2v-8H3v-2h8z</StreamGeometry>
+    <StreamGeometry x:Key="IconGear">M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.4h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2.2 1.6 2 3.4 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.4L19.4 13zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z</StreamGeometry>
+    <StreamGeometry x:Key="IconSaveAs">M5 3h11l5 5v5h-2V9l-4-4v4H7V5H5v14h7v2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm14 12 3 3-5 5h-3v-3l5-5zm-1.4 3.4-2.6 2.6v.6h.6l2.6-2.6-.6-.6z</StreamGeometry>
+    <StreamGeometry x:Key="IconBook">M4 4.5A2.5 2.5 0 0 1 6.5 2H20v16H6.5a.5.5 0 0 0 0 1H20v3H6.5A2.5 2.5 0 0 1 4 19.5v-15zM8 6v2h8V6H8zm0 4v2h6v-2H8z</StreamGeometry>
+    <!-- IconPlug: a power plug (VST3 plug-ins). IconPiano: a keyboard outline with two black keys
+         (piano roll). IconSteps: a 4x3 grid of step pads, some marked active (step sequencer).
+         (The former IconTools geometry was removed: the "Tools" toolbar button it belonged to
+         was replaced by the Piano roll and Steps buttons, and nothing referenced it.) -->
+    <!-- Paint Rooms: a paint brush (handle, ferrule, tip) with a stroke underneath. -->
+    <StreamGeometry x:Key="IconPaint">M20.7 2.3a1.4 1.4 0 0 1 0 2L13 12l-2-2 7.7-7.7a1.4 1.4 0 0 1 2 0zM10 11l3 3-1.2 1.2-3-3zM8.2 13.4l2.4 2.4c-.6 2.4-2.6 4.2-6.6 4.2.6-1 .8-2 .8-3.1 0-1.9 1.5-3.5 3.4-3.5zM3 21.2h18v1.6H3z</StreamGeometry>
+    <!-- Undo / Redo: hook arrows (original drawings): the arrow head points back (undo) or forward (redo). -->
+    <StreamGeometry x:Key="IconUndo">M9 4L3 9l6 5v-3.5h5a4.5 4.5 0 0 1 0 9H8v3h6a7.5 7.5 0 0 0 0-15H9z</StreamGeometry>
+    <StreamGeometry x:Key="IconRedo">M15 4l6 5-6 5v-3.5h-5a4.5 4.5 0 0 0 0 9h6v3h-6a7.5 7.5 0 0 1 0-15h5z</StreamGeometry>
+    <StreamGeometry x:Key="IconPlug">M8 2h2v5h4V2h2v5h2v4a6 6 0 0 1-5 5.9V22h-2v-5.1A6 6 0 0 1 6 11V7h2z</StreamGeometry>
+    <StreamGeometry x:Key="IconPiano">F1 M2 3h20v18H2z M3.5 4.5v15h17v-15z M8.1 4.5h2.2v8.5H8.1z M13.7 4.5h2.2v8.5h-2.2z M8.7 13h1v6.5h-1z M14.3 13h1v6.5h-1z</StreamGeometry>
+    <StreamGeometry x:Key="IconSteps">F1 M2 4h4v4H2z M7.3 4h4v4h-4z M12.6 4h4v4h-4z M17.9 4h4v4h-4z M2 10h4v4H2z M3 11v2h2v-2z M7.3 10h4v4h-4z M12.6 10h4v4h-4z M13.6 11v2h2v-2z M17.9 10h4v4h-4z M2 16h4v4H2z M7.3 16h4v4h-4z M8.3 17v2h2v-2z M12.6 16h4v4h-4z M17.9 16h4v4h-4z M18.9 17v2h2v-2z</StreamGeometry>
+    <StreamGeometry x:Key="IconRefresh">M12 4a8 8 0 0 1 7.4 5H17v2h6V5h-2v2.3A10 10 0 1 0 22 12h-2a8 8 0 1 1-8-8z</StreamGeometry>
+  </Styles.Resources>
+
+  <!-- Base window look: default text colour (TextBrush) inherited by every control, and the
+       Windows 11 UI font with fallbacks. -->
+  <Style Selector="Window">
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI, Inter, sans-serif" />
+  </Style>
+
+  <!-- Text helpers: ".dim" = secondary text (TextDimBrush); ".section" = small, spaced,
+       semi-bold section headings of the side panel in the accent colour (AccentBrush). -->
+  <Style Selector="TextBlock.dim">
+    <Setter Property="Foreground" Value="{DynamicResource TextDimBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.section">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="LetterSpacing" Value="1" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+  </Style>
+
+  <!-- Side panel cards: rounded panels on SurfaceBrush with a LineBrush border. -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="14,12" />
+  </Style>
+
+  <!-- Output card while it shows the VST3 plugin's audio (linked with «Send to DAW»): green
+       (GoodBrush) border and a faint green tint (Good_18Brush), with its section heading in green
+       too, so it is obvious that the meters show the DAW plug-in and not the app's own audio. -->
+  <Style Selector="Border.card.vst">
+    <Setter Property="BorderBrush" Value="{DynamicResource GoodBrush}" />
+    <Setter Property="BorderThickness" Value="1.5" />
+    <Setter Property="Background" Value="{DynamicResource Good_18Brush}" />
+  </Style>
+  <Style Selector="Border.card.vst TextBlock.section">
+    <Setter Property="Foreground" Value="{DynamicResource GoodBrush}" />
+  </Style>
+
+
+  <!-- Toolbar buttons (".tool"): flat and transparent; on hover the template's ContentPresenter
+       gets a translucent accent fill (AccentHi_33Brush) and accent text (AccentHiBrush); pressing
+       scales the button to 94 % with a 120 ms transition; disabled buttons use DisabledBrush.
+       Styling "/template/ ContentPresenter#PART_ContentPresenter" is needed because Fluent's own
+       :pointerover/:disabled styles set the colours on that template part, not on the Button. -->
+  <Style Selector="Button.tool">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.tool:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource AccentHi_33Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentHiBrush}" />
+  </Style>
+  <Style Selector="Button.tool:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.94)" />
+  </Style>
+  <Style Selector="Button.tool:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DisabledBrush}" />
+  </Style>
+  <!-- Coloured shapes inside a tool button (the red record dot) fade out when it is disabled. -->
+  <Style Selector="Button.tool:disabled Ellipse">
+    <Setter Property="Opacity" Value="0.3" />
+  </Style>
+  <Style Selector="Button.tool PathIcon">
+    <Setter Property="Width" Value="16" />
+    <Setter Property="Height" Value="16" />
+  </Style>
+
+  <!-- Primary button (Play / «Tocar»): filled with AccentBrush and OnAccentBrush text; brighter
+       (AccentHiBrush) on hover; LineBrush fill with TextFaintBrush text when disabled. -->
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <!-- «Tocar» pulses while the «press Tocar» bubble is shown. -->
+  <Style Selector="Button.primary.attention">
+    <Style.Animations>
+      <Animation Duration="0:0:0.9" IterationCount="INFINITE" PlaybackDirection="Alternate">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.55" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource AccentHiBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
+  </Style>
+  <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+  </Style>
+
+  <!-- Status dot: pulses while playing. Idle = 8 px TextDimBrush dot; with the ".running" class
+       it turns GoodBrush and fades between 100 % and 25 % opacity every 1.2 s. -->
+  <Style Selector="Ellipse.status">
+    <Setter Property="Width" Value="8" />
+    <Setter Property="Height" Value="8" />
+    <Setter Property="Fill" Value="{DynamicResource TextDimBrush}" />
+  </Style>
+  <Style Selector="Ellipse.status.running">
+    <Setter Property="Fill" Value="{DynamicResource GoodBrush}" />
+    <Style.Animations>
+      <Animation Duration="0:0:1.2" IterationCount="Infinite" PlaybackDirection="Alternate">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!-- DSP load meter of the side panel (MainWindow.axaml): ".dsp" is the load bar (GoodBrush,
+       switched through bindings to ".warn" = WarnBrush or ".danger" = DangerBrush as the load
+       rises) on a LineBrush
+       track; ".dsppeak" is an overlaid bar with a transparent fill whose indicator only draws a
+       2 px TextDimBrush line at its right edge, i.e. a peak-hold marker. -->
+  <Style Selector="ProgressBar.dsp">
+    <Setter Property="Foreground" Value="{DynamicResource GoodBrush}" />
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    <Setter Property="CornerRadius" Value="3" />
+  </Style>
+  <Style Selector="ProgressBar.dsp.warn">
+    <Setter Property="Foreground" Value="{DynamicResource WarnBrush}" />
+  </Style>
+  <Style Selector="ProgressBar.dsp.danger">
+    <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+  </Style>
+  <Style Selector="ProgressBar.dsppeak">
+    <Setter Property="Foreground" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextDimBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="ProgressBar.dsppeak /template/ Border#PART_Indicator">
+    <Setter Property="BorderBrush" Value="{DynamicResource TextDimBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,2,0" />
+  </Style>
+  <!-- Console (Csound's message log): a transparent ListBox in CodeFont at 12 px with compact
+       rows. Each line is a TextBlock with class "line" plus "info" (app messages, AccentHiBrush,
+       semi-bold), "warning" (WarnBrush) or "error" (DangerBrush), bound to ConsoleLine flags. -->
+  <Style Selector="ListBox.console">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+  <Style Selector="ListBox.console ListBoxItem">
+    <Setter Property="Padding" Value="12,1" />
+    <Setter Property="MinHeight" Value="0" />
+  </Style>
+  <!-- Keep the selected console line readable: a subtle band instead of the accent fill. -->
+  <Style Selector="ListBox.console ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+  </Style>
+  <Style Selector="ListBox.console ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Surface2Brush}" />
+  </Style>
+  <Style Selector="TextBlock.line.info">
+    <Setter Property="Foreground" Value="{DynamicResource AccentHiBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="TextBlock.line.warning">
+    <Setter Property="Foreground" Value="{DynamicResource WarnBrush}" />
+  </Style>
+  <Style Selector="TextBlock.line.error">
+    <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+  </Style>
+
+  <!-- Clickable console lines (they mention a CSD line number; class "link" bound to
+       ConsoleLine.HasSourceLine): hand cursor and underline on hover. The click itself is
+       handled in code. -->
+  <Style Selector="TextBlock.line.link">
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="TextBlock.line.link:pointerover">
+    <Setter Property="TextDecorations" Value="Underline" />
+  </Style>
+
+  <!-- Editor tabs: a ListBox (class "tabs") whose items look like tabs - top-rounded corners,
+       dim text (TextDimBrush); Surface2Brush on hover; the selected tab takes the editor's
+       SurfaceBrush so it visually merges with the editor below, with AccentHiBrush text.
+       ".tabclose" is the small × button in each tab; it turns translucent red (Danger_40Brush)
+       on hover. -->
+  <Style Selector="ListBox.tabs">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="4,4,0,0" />
+  </Style>
+  <Style Selector="ListBox.tabs ListBoxItem">
+    <Setter Property="Padding" Value="12,6,6,6" />
+    <Setter Property="Margin" Value="0,0,2,0" />
+    <Setter Property="CornerRadius" Value="8,8,0,0" />
+    <Setter Property="Foreground" Value="{DynamicResource TextDimBrush}" />
+  </Style>
+  <Style Selector="ListBox.tabs ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Surface2Brush}" />
+  </Style>
+  <Style Selector="ListBox.tabs ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentHiBrush}" />
+  </Style>
+  <Style Selector="Button.tabclose">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="4" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Foreground" Value="{DynamicResource TextDimBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.tabclose:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Danger_40Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+  </Style>
+
+  <!-- Help tips shown when hovering any control: nearly opaque Surface2 background
+       (Surface2_F2Brush), TextFaintBrush border, max 380 px wide with wrapping text, since many
+       tips are full sentences. -->
+  <Style Selector="ToolTip">
+    <Setter Property="Background" Value="{DynamicResource Surface2_F2Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextFaintBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="MaxWidth" Value="380" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+  <Style Selector="ToolTip TextBlock">
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <!-- Sliders in the preset's accent colour (AccentBrush; yellow only in the amber preset). -->
+  <Style Selector="Slider">
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+  </Style>
+
+  <!-- Panel splitters: invisible until hovered, then a translucent accent bar (Accent_40Brush). -->
+  <Style Selector="GridSplitter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="GridSplitter:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Accent_40Brush}" />
+  </Style>
+
+  <!-- AvaloniaEdit code editor (the CSD editor): SurfaceBrush background, TextBrush text,
+       TextFaintBrush line numbers, CodeFont at 14 px. Syntax colours are not set here: the
+       highlighting definition is rebuilt from AppTheme's Syn* roles when the preset changes. -->
+  <Style Selector="ae|TextEditor">
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="LineNumbersForeground" Value="{DynamicResource TextFaintBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+</Styles>

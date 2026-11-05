@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<!--
+  AvaloniaEdit syntax highlighting for Csound (.csd/.orc/.sco/.udo), embedded as the resource
+  CsoundVisual.Editor.Csound.xshd and loaded by MainWindow.axaml.cs.
+  The foreground colours below are placeholders: at load time each Color's foreground is replaced
+  with the active theme's "Syn" + name colour (e.g. SynOpcode), so edit the palette in
+  Theming/AppTheme.cs, not here. The opcode list is added at run time from the loaded Csound.
+  Rate colours follow Csound's variable prefixes: a = audio, k = control, i = init, S = string,
+  f = spectral, g = global; p1, p2 ... are p-fields.
+-->
+<SyntaxDefinition name="Csound" extensions=".csd;.orc;.sco;.udo" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <Color name="Comment"  foreground="#8F7F4F" fontStyle="italic" />
+  <Color name="String"   foreground="#F5A65B" />
+  <Color name="Tag"      foreground="#F5B800" fontWeight="bold" />
+  <Color name="Keyword"  foreground="#FFD84A" fontWeight="bold" />
+  <Color name="Header"   foreground="#FFB0C8" fontWeight="bold" />
+  <Color name="Opcode"   foreground="#7FD1C7" />
+  <Color name="ARate"    foreground="#FF9E6E" />
+  <Color name="KRate"    foreground="#C5E478" />
+  <Color name="IRate"    foreground="#9CC7FF" />
+  <Color name="SVar"     foreground="#F5A65B" />
+  <Color name="FVar"     foreground="#D6A8FF" />
+  <Color name="Global"   foreground="#FFE873" fontStyle="italic" />
+  <Color name="PField"   foreground="#FFB0C8" />
+  <Color name="Number"   foreground="#E6B3FF" />
+  <Color name="Macro"    foreground="#FF8A65" />
+
+  <RuleSet ignoreCase="false">
+    <Span color="Comment" begin=";" />
+    <Span color="Comment" begin="//" />
+    <Span color="Comment" multiline="true" begin="/\*" end="\*/" />
+    <Span color="String" begin="&quot;" end="&quot;">
+      <RuleSet>
+        <Span begin="\\" end="." />
+      </RuleSet>
+    </Span>
+    <Span color="String" multiline="true" begin="\{\{" end="\}\}" />
+
+    <Rule color="Tag">&lt;/?(CsoundSynthesizer|CsOptions|CsInstruments|CsScore|CsLicense|CsLicence|CsShortLicense|CsFileB|CsSampleB|CsMidifileB|Cabbage)\b[^&gt;]*&gt;</Rule>
+    <Rule color="Macro">\#(define|include|undef|ifdef|ifndef|else|end)\b|\$[A-Za-z_]\w*</Rule>
+
+    <Keywords color="Keyword">
+      <Word>instr</Word><Word>endin</Word><Word>opcode</Word><Word>endop</Word>
+      <Word>if</Word><Word>then</Word><Word>else</Word><Word>elseif</Word><Word>endif</Word><Word>fi</Word>
+      <Word>while</Word><Word>until</Word><Word>do</Word><Word>od</Word><Word>for</Word><Word>in</Word>
+      <Word>goto</Word><Word>igoto</Word><Word>kgoto</Word><Word>tigoto</Word><Word>timout</Word>
+      <Word>return</Word><Word>rireturn</Word><Word>reinit</Word><Word>rigoto</Word>
+      <Word>xin</Word><Word>xout</Word><Word>void</Word><Word>struct</Word><Word>case</Word><Word>switch</Word><Word>default</Word><Word>endsw</Word>
+    </Keywords>
+
+    <Keywords color="Header">
+      <Word>sr</Word><Word>kr</Word><Word>ksmps</Word><Word>nchnls</Word><Word>nchnls_i</Word><Word>0dbfs</Word><Word>A4</Word>
+    </Keywords>
+
+    <Keywords color="Opcode">
+      <Word>oscil</Word><Word>oscili</Word><Word>oscil3</Word><Word>poscil</Word><Word>poscil3</Word><Word>vco</Word><Word>vco2</Word><Word>vco2init</Word>
+      <Word>pluck</Word><Word>wgpluck2</Word><Word>foscil</Word><Word>foscili</Word><Word>buzz</Word><Word>gbuzz</Word><Word>fof</Word><Word>grain</Word><Word>partikkel</Word>
+      <Word>noise</Word><Word>rand</Word><Word>randi</Word><Word>randh</Word><Word>random</Word><Word>rnd</Word><Word>birnd</Word><Word>pinker</Word><Word>pinkish</Word>
+      <Word>linen</Word><Word>linenr</Word><Word>line</Word><Word>linseg</Word><Word>linsegr</Word><Word>expon</Word><Word>expseg</Word><Word>expsegr</Word><Word>transeg</Word>
+      <Word>adsr</Word><Word>madsr</Word><Word>mxadsr</Word><Word>xadsr</Word><Word>envlpx</Word><Word>port</Word><Word>portk</Word><Word>lag</Word><Word>lagud</Word>
+      <Word>moogladder</Word><Word>moogladder2</Word><Word>moogvcf</Word><Word>moogvcf2</Word><Word>lpf18</Word><Word>zdf_ladder</Word><Word>zdf_2pole</Word><Word>diode_ladder</Word>
+      <Word>butlp</Word><Word>buthp</Word><Word>butbp</Word><Word>butbr</Word><Word>butterlp</Word><Word>butterhp</Word><Word>butterbp</Word><Word>butterbr</Word>
+      <Word>tone</Word><Word>atone</Word><Word>tonex</Word><Word>reson</Word><Word>resonz</Word><Word>rezzy</Word><Word>svfilter</Word><Word>statevar</Word><Word>bqrez</Word><Word>K35_lpf</Word><Word>K35_hpf</Word>
+      <Word>delay</Word><Word>delayr</Word><Word>delayw</Word><Word>deltap</Word><Word>deltapi</Word><Word>deltap3</Word><Word>vdelay</Word><Word>vdelay3</Word><Word>vdelayx</Word><Word>comb</Word><Word>alpass</Word><Word>flanger</Word>
+      <Word>reverb</Word><Word>reverb2</Word><Word>reverbsc</Word><Word>freeverb</Word><Word>nreverb</Word><Word>babo</Word>
+      <Word>out</Word><Word>outs</Word><Word>outq</Word><Word>outh</Word><Word>outo</Word><Word>outch</Word><Word>outall</Word><Word>ins</Word><Word>inch</Word>
+      <Word>pan</Word><Word>pan2</Word><Word>vbap</Word><Word>hrtfmove</Word><Word>hrtfstat</Word>
+      <Word>chnget</Word><Word>chnset</Word><Word>chn_k</Word><Word>chnk</Word><Word>chn_a</Word><Word>chn_S</Word><Word>chnexport</Word><Word>chnmix</Word><Word>chnclear</Word>
+      <Word>soundin</Word><Word>diskin</Word><Word>diskin2</Word><Word>loscil</Word><Word>loscil3</Word><Word>flooper</Word><Word>flooper2</Word><Word>sndwarp</Word><Word>mincer</Word><Word>temposcal</Word>
+      <Word>fout</Word><Word>fouti</Word><Word>fin</Word><Word>monitor</Word>
+      <Word>table</Word><Word>tablei</Word><Word>table3</Word><Word>tab</Word><Word>tab_i</Word><Word>tablew</Word><Word>ftgen</Word><Word>ftgenonce</Word><Word>ftlen</Word><Word>ftsr</Word><Word>ftchnls</Word>
+      <Word>init</Word><Word>print</Word><Word>printk</Word><Word>printk2</Word><Word>prints</Word><Word>printks</Word><Word>printf</Word><Word>printf_i</Word><Word>puts</Word><Word>sprintf</Word><Word>sprintfk</Word>
+      <Word>event</Word><Word>event_i</Word><Word>schedule</Word><Word>schedulek</Word><Word>schedwhen</Word><Word>schedkwhen</Word><Word>scoreline</Word><Word>scoreline_i</Word><Word>turnoff</Word><Word>turnoff2</Word><Word>turnon</Word>
+      <Word>metro</Word><Word>metro2</Word><Word>trigger</Word><Word>changed</Word><Word>changed2</Word><Word>timeinsts</Word><Word>timeinstk</Word><Word>times</Word><Word>timek</Word>
+      <Word>mtof</Word><Word>ftom</Word><Word>cpsmidinn</Word><Word>cpspch</Word><Word>cpsoct</Word><Word>octpch</Word><Word>pchoct</Word><Word>octcps</Word><Word>cpsmidi</Word><Word>ampmidi</Word><Word>notnum</Word><Word>veloc</Word>
+      <Word>ampdb</Word><Word>dbamp</Word><Word>ampdbfs</Word><Word>dbfsamp</Word><Word>rms</Word><Word>balance</Word><Word>balance2</Word><Word>gain</Word><Word>compress</Word><Word>compress2</Word><Word>dam</Word>
+      <Word>limit</Word><Word>clip</Word><Word>wrap</Word><Word>mirror</Word><Word>samphold</Word><Word>downsamp</Word><Word>upsamp</Word><Word>interp</Word>
+      <Word>int</Word><Word>frac</Word><Word>round</Word><Word>floor</Word><Word>ceil</Word><Word>abs</Word><Word>exp</Word><Word>log</Word><Word>log2</Word><Word>log10</Word><Word>sqrt</Word><Word>pow</Word>
+      <Word>sin</Word><Word>cos</Word><Word>tan</Word><Word>sininv</Word><Word>cosinv</Word><Word>taninv</Word><Word>sinh</Word><Word>cosh</Word><Word>tanh</Word><Word>min</Word><Word>max</Word>
+      <Word>lfo</Word><Word>vibr</Word><Word>vibrato</Word><Word>jitter</Word><Word>jitter2</Word><Word>jspline</Word><Word>rspline</Word>
+      <Word>pvsanal</Word><Word>pvsynth</Word><Word>pvscale</Word><Word>pvsshift</Word><Word>pvsmorph</Word><Word>pvsblur</Word><Word>pvsfread</Word><Word>pvstencil</Word>
+      <Word>massign</Word><Word>pgmassign</Word><Word>midiin</Word><Word>midiout</Word><Word>noteon</Word><Word>noteoff</Word><Word>midinoteoff</Word><Word>ctrl7</Word><Word>midictrl</Word>
+      <Word>OSCinit</Word><Word>OSClisten</Word><Word>OSCsend</Word><Word>clear</Word><Word>zakinit</Word><Word>zaw</Word><Word>zar</Word><Word>zkw</Word><Word>zkr</Word>
+      <Word>fillarray</Word><Word>lenarray</Word><Word>genarray</Word><Word>maxarray</Word><Word>minarray</Word><Word>sumarray</Word><Word>sorta</Word><Word>sortd</Word>
+      <Word>strcat</Word><Word>strcmp</Word><Word>strlen</Word><Word>strsub</Word><Word>strtod</Word><Word>strtol</Word><Word>sfload</Word><Word>sfplay</Word><Word>sfplay3</Word><Word>sfinstr</Word><Word>sfpreset</Word>
+      <Word>fluidEngine</Word><Word>fluidLoad</Word><Word>fluidProgramSelect</Word><Word>fluidNote</Word><Word>fluidOut</Word><Word>fluidAllOut</Word>
+      <Word>exitnow</Word><Word>system</Word><Word>system_i</Word><Word>active</Word><Word>maxalloc</Word><Word>prealloc</Word><Word>nstrnum</Word><Word>pset</Word><Word>passign</Word>
+    </Keywords>
+
+    <Rule color="PField">\bp\d+\b</Rule>
+    <Rule color="Global">\bg[aikSfw][A-Za-z0-9_]*\b</Rule>
+    <Rule color="ARate">\ba[A-Za-z_][A-Za-z0-9_]*\b</Rule>
+    <Rule color="KRate">\bk[A-Za-z_][A-Za-z0-9_]*\b</Rule>
+    <Rule color="IRate">\bi[A-Za-z_][A-Za-z0-9_]*\b</Rule>
+    <Rule color="SVar">\bS[A-Za-z_][A-Za-z0-9_]*\b</Rule>
+    <Rule color="FVar">\b[fw][A-Za-z_][A-Za-z0-9_]*\b</Rule>
+    <Rule color="Number">\b(0x[0-9A-Fa-f]+|\d+(\.\d*)?([eE][+-]?\d+)?|\.\d+([eE][+-]?\d+)?)\b</Rule>
+    <Rule color="Keyword">^\s*[ifeastbmnqrvxy](?=\s|\d|$)</Rule>
+  </RuleSet>
+</SyntaxDefinition>
