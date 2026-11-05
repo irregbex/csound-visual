@@ -4,6 +4,11 @@
 on Windows. You write code, and you play, see and control it live: every variable, number or
 channel in the code can be inspected and dragged while it sounds.
 
+> **Made 100% with vibe coding.** Every line of code, every test and every page of documentation
+> of Csound Visual was written by an AI ([Claude Code](https://claude.com/claude-code), by
+> Anthropic) through natural-language conversation. Its author directed the project, tried it and
+> decided what to build, but did not write the code by hand.
+
 ![Layers of Csound Visual](../diagrams/architecture.svg)
 
 ## What you can do

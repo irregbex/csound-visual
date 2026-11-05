@@ -4,6 +4,11 @@
 Windows. Lo escribes en código y lo tocas, lo ves y lo controlas en vivo: cada variable, número o
 canal del código se puede inspeccionar y arrastrar mientras suena.
 
+> **Hecho 100% con vibe coding.** Cada línea de código, cada prueba y cada página de documentación
+> de Csound Visual la escribió una IA ([Claude Code](https://claude.com/claude-code), de
+> Anthropic) a partir de conversaciones en lenguaje natural. Su autor dirigió el proyecto, lo
+> probó y decidió qué construir, pero no escribió el código a mano.
+
 ![Capas de Csound Visual](../diagrams/architecture.svg)
 
 ## Qué puedes hacer

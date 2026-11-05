@@ -7,6 +7,11 @@ with a smart editor, hear and see them in real time, play them with MIDI, sequen
 piano roll and a step sequencer, run your VST3 plug-ins after Csound, and send the same code into
 Cubase as a VST3 plug-in.
 
+> **Made 100% with vibe coding.** Every line of code, every test and every page of documentation
+> of Csound Visual was written by an AI ([Claude Code](https://claude.com/claude-code), by
+> Anthropic) through natural-language conversation. Its author directed the project, tried it and
+> decided what to build, but did not write the code by hand.
+
 *[Leer en español](README.es.md)*
 
 ![Main window](docs/images/main-window.png)

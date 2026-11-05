@@ -7,6 +7,11 @@ un editor inteligente, escúchalas y míralas en tiempo real, tócalas con MIDI,
 piano roll y un secuenciador por pasos, pasa el sonido por tus plugins VST3 y manda el mismo código
 a Cubase como plugin VST3.
 
+> **Hecho 100% con vibe coding.** Cada línea de código, cada prueba y cada página de documentación
+> de Csound Visual la escribió una IA ([Claude Code](https://claude.com/claude-code), de
+> Anthropic) a partir de conversaciones en lenguaje natural. Su autor dirigió el proyecto, lo
+> probó y decidió qué construir, pero no escribió el código a mano.
+
 *[Read in English](README.md)*
 
 ![Ventana principal](docs/images/main-window.png)
