@@ -14,6 +14,10 @@ a Cubase como plugin VST3.
 
 *[Read in English](README.md)*
 
+[![Ver la demo de 1 minuto en YouTube](docs/images/video-demo.jpg)](https://youtu.be/20IOnNtin9M)
+
+▶ **[Ver la demo de 1 minuto en YouTube](https://youtu.be/20IOnNtin9M)** (en inglés; narración con voz sintética)
+
 ![Ventana principal](docs/images/main-window.png)
 
 ## Lo principal
